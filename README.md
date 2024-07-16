@@ -2,7 +2,7 @@
 
 ## Integrantes
 - Maria Eduarda de Pinho Braga
-- Arthur Ataíde Saraiva
+- Arthur Ataíde de Melo Saraiva
 - Guilherme Broedel Zorzal
 - Eduardo Antunes
 - João Gabriel Angelo Bradachi
