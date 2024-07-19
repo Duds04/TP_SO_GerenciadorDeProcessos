@@ -1,0 +1,6 @@
+*.o
+controle
+compile_commands.json
+.cache/
+.vscode/
+.idea/
