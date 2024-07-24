@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
+#include "TListaInstrucao.h"
 
 typedef struct TADprocesso{
     int idProcesso;
@@ -8,6 +7,7 @@ typedef struct TADprocesso{
     //estrutura de dados
     //prioridade
     //estado
+    TListaInstrucao *listaInstrucao;
     int tempoInicio;
     int tempoCPU;
 }processo;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #define TAM_INIT 30
 
 typedef struct Tinstrucao{
@@ -12,12 +13,14 @@ typedef struct Tinstrucao{
 typedef struct{
     Tinstrucao *listaIntrucao;
     int primeiro, ultimo;
+    int tamanho;
 } TListaInstrucao;
 
-int LPIniciaLista(TListaInstrucao *pLista);
-int LPInsereFinal(TListaInstrucao *pLista, Tinstrucao *instrucao, int linha);
-int LPNumeroPalavras(TListaInstrucao *pLista);
+int LIIniciaLista(TListaInstrucao *pLista);
+int LIAumentaTamanhoDaLista(TListaInstrucao *pLista);
+int LIInsereFinal(TListaInstrucao *pLista, Tinstrucao *instrucao, int linha);
+int LINumeroPalavras(TListaInstrucao *pLista);
 //int LPVerificaPalavra(TListaInstrucao *pLista, Tinstrucao *instrucao, int linha);
-void LImprimeListaPalavra(TListaInstrucao* pLista);
+void LIImprimeLista(TListaInstrucao* pLista);
 //int RemovePalavraFinal(TListaInstrucao *pLista);
 //int RemovePalavraDada(TListaInstrucao *pLista, char *palavra);
