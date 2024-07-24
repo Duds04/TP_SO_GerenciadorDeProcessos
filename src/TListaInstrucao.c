@@ -43,16 +43,16 @@ void liImprimeLista(TListaInstrucao *pLista){
 
 void liImprimeInstrucao(Tinstrucao instrucao){
     if(instrucao.tipoIntrucao == 'N' || instrucao.tipoIntrucao == 'D' || instrucao.tipoIntrucao == 'B' || instrucao.tipoIntrucao == 'F'){
-        printf("%c %d", &instrucao.tipoIntrucao, &instrucao.numeroEntrada1);
+        printf("%c %d\n", instrucao.tipoIntrucao, instrucao.numeroEntrada1);
 
     }else if(instrucao.tipoIntrucao == 'V' || instrucao.tipoIntrucao == 'A' || instrucao.tipoIntrucao == 'S'){
-        printf("%c %d %d", &instrucao.tipoIntrucao, &instrucao.numeroEntrada1, &instrucao.numeroEntrada2);
+        printf("%c %d %d\n", instrucao.tipoIntrucao, instrucao.numeroEntrada1, instrucao.numeroEntrada2);
 
     }else if(instrucao.tipoIntrucao == 'T'){
-        printf("%c", &instrucao.tipoIntrucao);
+        printf("%c\n", instrucao.tipoIntrucao);
 
     }else if(instrucao.tipoIntrucao == 'R'){
-        printf("%c %s", &instrucao.tipoIntrucao, &instrucao.nomeArquivo);
+        printf("%c %s\n", instrucao.tipoIntrucao, instrucao.nomeArquivo);
     }
     
 }
