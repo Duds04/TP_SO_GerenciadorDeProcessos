@@ -30,6 +30,9 @@ int liAumentaTamanhoDaLista(TListaInstrucao *pLista){
 }
 
 int liInsereFinal(TListaInstrucao *pLista, Tinstrucao instrucao){
+    if(pLista->ultimo == pLista->tamanho){
+        liAumentaTamanhoDaLista(&pLista);
+    }
     pLista->listaIntrucao[pLista->ultimo] = instrucao;
     pLista->ultimo++;
     

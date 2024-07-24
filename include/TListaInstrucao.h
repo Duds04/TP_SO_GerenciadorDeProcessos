@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#define TAM_INIT 30
+#define TAM_INIT 32
 
 typedef struct Tinstrucao{
     char tipoIntrucao;
