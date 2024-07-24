@@ -58,6 +58,7 @@ void liIniciaLista(TListaInstrucao *pLista){
         exit(1);
     }
 
+    pLista->tamanho = TAM_INIT;
     pLista->intrucoes = listInstruct;
     pLista->ultimo = 0;
 }
