@@ -7,10 +7,10 @@ int liIniciaLista(TListaInstrucao *pLista){
 
     if (listInstruct == NULL) {
         printf("Erro ao alocar memória!");
-        exit;
+        exit(1);
     }
 
-    pLista->listaIntrucao = listInstruct;
+    pLista->intrucoes = listInstruct;
     pLista->ultimo = 0;
 
     return 0;
@@ -18,11 +18,11 @@ int liIniciaLista(TListaInstrucao *pLista){
 
 int liAumentaTamanhoDaLista(TListaInstrucao *pLista){
 
-    pLista->listaIntrucao = realloc(pLista->listaIntrucao, pLista->tamanho*2 * sizeof(Tinstrucao));
+    pLista->intrucoes = realloc(pLista->intrucoes, pLista->tamanho*2 * sizeof(Tinstrucao));
     
-    if (pLista->listaIntrucao == NULL) {
+    if (pLista->intrucoes == NULL) {
         printf("Erro ao realocar memória!");
-        exit;
+        exit(1);
     }
     pLista->tamanho = pLista->tamanho*2;
 
@@ -33,14 +33,14 @@ int liInsereFinal(TListaInstrucao *pLista, Tinstrucao instrucao){
     if(pLista->ultimo == pLista->tamanho){
         liAumentaTamanhoDaLista(&pLista);
     }
-    pLista->listaIntrucao[pLista->ultimo] = instrucao;
+    pLista->intrucoes[pLista->ultimo] = instrucao;
     pLista->ultimo++;
     
 }
 
 void liImprimeLista(TListaInstrucao *pLista){
     for(int i=0; i<pLista->ultimo; i++){
-        liImprimeInstrucao(pLista->listaIntrucao[i]);
+        liImprimeInstrucao(pLista->intrucoes[i]);
     }
 }
 
@@ -69,5 +69,5 @@ void liImprimeInstrucao(Tinstrucao instrucao){
 }
 
 void liLiberaLista(TListaInstrucao *pLista){
-    free(pLista->listaIntrucao);
+    free(pLista->intrucoes);
 }

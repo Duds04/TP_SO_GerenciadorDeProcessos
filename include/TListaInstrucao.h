@@ -12,7 +12,7 @@ typedef struct Tinstrucao{
 }Tinstrucao;
 
 typedef struct TListaInstrucao{
-    Tinstrucao *listaIntrucao;
+    Tinstrucao *intrucoes;
     int ultimo;
     int tamanho;
 } TListaInstrucao;
