@@ -29,12 +29,15 @@ int LIAumentaTamanhoDaLista(TListaInstrucao *pLista){
 
     return 0;
 }
+
 int LIInsereFinal(TListaInstrucao *pLista, Tinstrucao *instrucao, int linha){
 
 }
+
 int LINumeroPalavras(TListaInstrucao *pLista){
 
 }
+
 void LIImprimeLista(TListaInstrucao* pLista){
 
 }
