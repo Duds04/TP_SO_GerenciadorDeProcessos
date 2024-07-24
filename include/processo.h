@@ -1,6 +1,9 @@
-#include "TListaInstrucao.h"
+#ifndef PROCESSO_H
+#define PROCESSO_H
 
-typedef struct Tprocesso{
+#include "instrucao.h"
+
+typedef struct {
     int idProcesso;
     int idProcessoPai;
     int pc; // usado de índice para a lista de instruções
@@ -10,4 +13,6 @@ typedef struct Tprocesso{
     TListaInstrucao listaInstrucao;
     int tempoInicio;
     int tempoCPU;
-}Tprocesso;
+} Tprocesso;
+
+#endif // PROCESSO_H
