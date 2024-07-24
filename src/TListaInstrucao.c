@@ -1,43 +1,62 @@
 #include "TListaInstrucao.h"
 
-int LIIniciaLista(TListaInstrucao *pLista){
+int liIniciaLista(TListaInstrucao *pLista){
     Tinstrucao *listInstruct;
 
     listInstruct = (Tinstrucao *) malloc(TAM_INIT * sizeof(Tinstrucao));
 
     if (listInstruct == NULL) {
         printf("Erro ao alocar memória!");
-        return 1;
+        exit;
     }
 
     pLista->listaIntrucao = listInstruct;
-    pLista->primeiro = 0;
-    pLista->ultimo = pLista->primeiro;
+    pLista->ultimo = 0;
 
     return 0;
 }
 
-int LIAumentaTamanhoDaLista(TListaInstrucao *pLista){
+int liAumentaTamanhoDaLista(TListaInstrucao *pLista){
 
-    pLista->listaIntrucao = realloc(pLista->listaIntrucao, pLista->tamanho*2 * sizeof(int));
+    pLista->listaIntrucao = realloc(pLista->listaIntrucao, pLista->tamanho*2 * sizeof(Tinstrucao));
     
     if (pLista->listaIntrucao == NULL) {
         printf("Erro ao realocar memória!");
-        return 1;
+        exit;
     }
     pLista->tamanho = pLista->tamanho*2;
 
     return 0;
 }
 
-int LIInsereFinal(TListaInstrucao *pLista, Tinstrucao *instrucao, int linha){
-
+int liInsereFinal(TListaInstrucao *pLista, Tinstrucao instrucao){
+    pLista->listaIntrucao[pLista->ultimo] = instrucao;
+    pLista->ultimo++;
+    
 }
 
-int LINumeroPalavras(TListaInstrucao *pLista){
-
+void liImprimeLista(TListaInstrucao *pLista){
+    for(int i=0; i<pLista->ultimo; i++){
+        liImprimeInstrucao(pLista->listaIntrucao[i]);
+    }
 }
 
-void LIImprimeLista(TListaInstrucao* pLista){
+void liImprimeInstrucao(Tinstrucao instrucao){
+    if(instrucao.tipoIntrucao == 'N' || instrucao.tipoIntrucao == 'D' || instrucao.tipoIntrucao == 'B' || instrucao.tipoIntrucao == 'F'){
+        printf("%c %d", &instrucao.tipoIntrucao, &instrucao.numeroEntrada1);
 
+    }else if(instrucao.tipoIntrucao == 'V' || instrucao.tipoIntrucao == 'A' || instrucao.tipoIntrucao == 'S'){
+        printf("%c %d %d", &instrucao.tipoIntrucao, &instrucao.numeroEntrada1, &instrucao.numeroEntrada2);
+
+    }else if(instrucao.tipoIntrucao == 'T'){
+        printf("%c", &instrucao.tipoIntrucao);
+
+    }else if(instrucao.tipoIntrucao == 'R'){
+        printf("%c %s", &instrucao.tipoIntrucao, &instrucao.nomeArquivo);
+    }
+    
+}
+
+void liLiberaLista(TListaInstrucao *pLista){
+    free(pLista->listaIntrucao);
 }

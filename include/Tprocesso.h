@@ -3,7 +3,7 @@
 typedef struct TADprocesso{
     int idProcesso;
     int idProcessoPai;
-    int PC;
+    int PC; // usado de índice para a lista de instruções
     //estrutura de dados
     //prioridade
     //estado
