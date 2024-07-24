@@ -74,7 +74,7 @@ static void realoca(TListaInstrucao *pLista) {
 }
 
 void liInsereFinal(TListaInstrucao *pLista, Instrucao instrucao){
-    if(pLista->ultimo + 1 > pLista->tamanho) realoca(pLista);
+    if(pLista->ultimo >= pLista->tamanho) realoca(pLista);
     pLista->intrucoes[pLista->ultimo] = instrucao;
     pLista->ultimo++;
 }
