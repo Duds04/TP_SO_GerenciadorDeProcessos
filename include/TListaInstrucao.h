@@ -8,7 +8,7 @@ typedef struct Tinstrucao{
     char tipoIntrucao;
     int numeroEntrada1;
     int numeroEntrada2;
-    char nomeArquivo[30];
+    char nomeArquivo[TAM_INIT];
 }Tinstrucao;
 
 typedef struct TListaInstrucao{
