@@ -15,7 +15,7 @@ void gerencia_main(int controle_fd) {
     }
     TListaInstrucao programa;
     liIniciaLista(&programa);
-    int r = carrega_executavel(&programa, init);
+    int r = carrega_executavel(&programa, init); // Carrega instruções para a lista e retorna numero de registradores usados nesse programa
     printf("Instruções de init:\n");
     liImprimeLista(&programa);
     printf("Registradores para init: %d\n", r);
@@ -31,6 +31,7 @@ void gerencia_main(int controle_fd) {
                     return;
                 default:
                     printf("Recebi um %c\n", buf[i]);
+                    // Aqui a instrução que o processo recebeu via pipe (recebeu do processo de controle) deve ser executada
             }
         }
     }
