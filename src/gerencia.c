@@ -3,6 +3,7 @@
 
 #include "gerencia.h"
 #include "instrucao.h"
+#include "tabela.h"
 
 #define BUF_MAX 64
 
@@ -13,38 +14,17 @@ void gerencia_main(int controle_fd) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
         return;
     }
-    TListaInstrucao programa;
-    liIniciaLista(&programa);
-    // Carrega instruções para a lista e retorna numero de registradores usados
-    // nesse programa
-    int r = carrega_executavel(&programa, init);
-    printf("Instruções de init:\n");
-    liImprimeLista(&programa);
-    printf("Registradores para init: %d\n", r);
-    fclose(init);
+    TTabelaProcesso tabela;
+    tpIniciaLista(&tabela);
 
-    // Teste da lista de bloqueados (só pra provar que eu fiz testes kkkkk),
-    // depois dá pra apagar esse código sem culpa
-    /*
-#include <assert.h>
-    ListaBloqueados bloq;
-    bloqueados_inicia(&bloq);
-    bloqueados_insere(&bloq, 0, 2);
-    bloqueados_insere(&bloq, 1, 1);
-    bloqueados_insere(&bloq, 2, 2);
-    bloqueados_tique(&bloq);
-    int p = bloqueados_remove0(&bloq);
-    assert(p == 1);
-    p = bloqueados_remove0(&bloq);
-    assert(p < 0);
-    bloqueados_tique(&bloq);
-    bloqueados_imprime(&bloq);
-    int p0 = bloqueados_remove0(&bloq);
-    int p1 = bloqueados_remove0(&bloq);
-    int p2 = bloqueados_remove0(&bloq);
-    assert(p0 >= 0 && p1 >= 0 && p2 < 0);
-    bloqueados_libera(&bloq);
-    */
+    // Carrega o processo inicial do arquivo init
+    TListaInstrucao programa_init;
+    liIniciaLista(&programa_init);
+    int r = carrega_executavel(&programa_init, init);
+    fclose(init);
+    tpAdicionaProcesso(&tabela, -1, 0, 10, r, programa_init, 0);
+    tpAdicionaProcesso(&tabela, 0, 5, 10, r, programa_init, 5);
+    tpImprimeLista(&tabela);
 
     char buf[BUF_MAX];
     while(1) {
@@ -61,4 +41,5 @@ void gerencia_main(int controle_fd) {
             }
         }
     }
+    tpLiberaLista(&tabela);
 }

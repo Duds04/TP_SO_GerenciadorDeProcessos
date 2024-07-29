@@ -1,19 +1,29 @@
 #ifndef TABELA_H
 #define TABELA_H
 
+#include "instrucao.h"
 #include "processo.h"
 
-typedef struct TTabelaProcesso{
-    Tprocesso *tabelaProcessos;
+typedef struct TTabelaProcesso {
+    Tprocesso *processos;
     int ultimo;
     int tamanho;
 } TTabelaProcesso;
 
 void tpIniciaLista(TTabelaProcesso *pLista);
-void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista);
-void tpInsereFinal(TTabelaProcesso *pLista, Tprocesso processo);
+
+// Adiciona um processo à tabela
+void tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
+        int prioridade, int num_regs, TListaInstrucao codigo, int tempoInicio);
+
+// Finaliza um processo na tabela
+void tpFinalizaProcesso(TTabelaProcesso *pLista, int id);
+
+// Retorna um ponteiro para o processo dado seu ID
+Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id);
+
 void tpImprimeLista(TTabelaProcesso* pLista);
-void tpImprimeInstrucao(TTabelaProcesso instrucao);
+
 void tpLiberaLista(TTabelaProcesso *pLista);
 
 #endif // TABELA_H

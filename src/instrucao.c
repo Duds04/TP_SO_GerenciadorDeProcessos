@@ -79,8 +79,8 @@ void liInsereFinal(TListaInstrucao *pLista, Instrucao instrucao){
     pLista->ultimo++;
 }
 
-void liImprimeLista(TListaInstrucao *pLista){
-    for(int i=0; i<pLista->ultimo; i++){
+void liImprimeLista(const TListaInstrucao *pLista, int inicio){
+    for(int i=inicio; i<pLista->ultimo; i++){
         liImprimeInstrucao(pLista->intrucoes[i]);
     }
 }

@@ -22,7 +22,7 @@ typedef struct {
 
 void liIniciaLista(TListaInstrucao *pLista);
 void liInsereFinal(TListaInstrucao *pLista, Instrucao instrucao);
-void liImprimeLista(TListaInstrucao* pLista);
+void liImprimeLista(const TListaInstrucao* pLista, int inicio);
 void liImprimeInstrucao(Instrucao instrucao);
 void liLiberaLista(TListaInstrucao *pLista);
 

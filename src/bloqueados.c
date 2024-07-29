@@ -32,7 +32,7 @@ void bloqueados_insere(ListaBloqueados *lb, int pid, int tempo_restante) {
 
 // Imprime a lista de bloqueados
 void bloqueados_imprime(const ListaBloqueados *lb) {
-    printf("PID TEMPO\n---------\n");
+    printf("PID TEMPO\n-----------\n");
     for(int i = 0; i < lb->tam; ++i)
         printf("%02d %03d\n", lb->processos[i].pid,
                 lb->processos[i].tempo_restante);
@@ -54,7 +54,7 @@ void bloqueados_tique(ListaBloqueados *lb) {
         lb->processos[i].tempo_restante -= 1;
         if(lb->processos[i].tempo_restante == 0) {
             // Processo com desbloqueio pendente; deve ser movido para o fim da
-            // lista, para um operação remove0 futura
+            // lista, para uma operação remove0 futura
             ProcessoBloqueado aux = lb->processos[final];
             lb->processos[final] = lb->processos[i];
             lb->processos[i] = aux;
