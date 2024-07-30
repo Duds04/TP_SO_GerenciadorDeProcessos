@@ -25,12 +25,15 @@ int main() {
     // Processo filho é responsável pelas funções de gerência, e vai ler os
     // dados do usuário indiretamente a partir do pipe criado
     if(p == 0) {
+        close(chan[1]);
         gerencia_main(chan[0]);
+        close(chan[0]);
         return 0;
     }
 
     // Processo pai é o de controle: ele lê os dados do usuário e escreve-os
     // no pipe para uso na simulação
+    close(chan[0]);
     char buf[MAX];
     printf("== CONTROLE DE SIMULAÇÃO ==\n");
     while(1) {
@@ -47,7 +50,7 @@ int main() {
         }
         fprintf(stderr, "[?] Não entendi... Tente novamente\n");
     }
-
+    close(chan[1]);
     return 0;
 }
 
