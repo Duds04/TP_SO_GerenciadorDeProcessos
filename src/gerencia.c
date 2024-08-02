@@ -36,10 +36,12 @@ void gerencia_main(int controle_fd) {
     robin_adiciona(&rob, 3);
     robin_adiciona(&rob, 4);
     robin_adiciona(&rob, 5);
+    robin_imprime(&rob);
     robin_adiciona(&rob, 6);
     robin_adiciona(&rob, 7);
     robin_adiciona(&rob, 8);
     robin_adiciona(&rob, 9);
+    robin_imprime(&rob);
     assert(robin_retira(&rob) == 1);
     assert(robin_retira(&rob) == 2);
     assert(robin_retira(&rob) == 3);
@@ -49,7 +51,7 @@ void gerencia_main(int controle_fd) {
     assert(robin_retira(&rob) == 7);
     assert(robin_retira(&rob) == 8);
     assert(robin_retira(&rob) == 9);
-
+    robin_imprime(&rob);
     robin_libera(&rob);
 
     char buf[BUF_MAX];

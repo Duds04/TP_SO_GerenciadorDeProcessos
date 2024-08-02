@@ -15,7 +15,7 @@ void robin_inicia(FilaRobin *r) {
         exit(64);
     }
     r->primeiro = 0;
-    r->ultimo = -1;
+    r->ultimo = 0; 
     r->capacidade = CAP_INICIAL;
 }
 
@@ -26,18 +26,23 @@ void robin_libera(FilaRobin *r) {
 }
 
 static void robin_aumenta(FilaRobin *r) {
-    int* aux = (int*) malloc(r->capacidade * 2);
+    int count = 0;
+    int* aux = (int*) malloc(sizeof(int) * r->capacidade * 2);
     if(aux == NULL) {
         fprintf(stderr, "[!] Realocação robin falhada\n");
         exit(64);
     }
-    for(int i = r->primeiro, count = 0; i != r->ultimo; i = INC_MOD(i, r->capacidade), ++count){
+    
+    for(int i = r->primeiro; i != r->ultimo; i = INC_MOD(i, r->capacidade)){
         aux[count] = r->id_processos[i];
+        count++;
     }
     free(r->id_processos);
     r->id_processos = aux;
     
     r->capacidade *= 2;
+    r->primeiro = 0;
+    r->ultimo = count;
 }
 
 int robin_retira(FilaRobin *r) {
@@ -50,17 +55,21 @@ int robin_retira(FilaRobin *r) {
     return escolhido;
 }
 
+static bool robin_cheio(const FilaRobin *r) {
+    return r->primeiro == INC_MOD(r->ultimo, r->capacidade);
+}
+
 void robin_adiciona(FilaRobin *r, int id_processo) {
-    int proximo = INC_MOD(r->ultimo, r->capacidade);
-    if(proximo == r->primeiro)
+    // verifica se está cheio 
+    if(robin_cheio(r))
         robin_aumenta(r);
-    r->ultimo = proximo;
-    r->id_processos[proximo] = id_processo;
+    r->id_processos[r->ultimo] = id_processo;
+    r->ultimo = INC_MOD(r->ultimo, r->capacidade);
 }
 
 // Checa se a fila está vazia
 bool robin_vazio(const FilaRobin *r) {
-    return r->primeiro == INC_MOD(r->ultimo, r->capacidade);
+    return r->primeiro == r->ultimo;
 }
 
 void robin_imprime(const FilaRobin *r){
