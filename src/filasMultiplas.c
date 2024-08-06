@@ -84,6 +84,7 @@ int retiraProcesso(PfilasPrioridades filas){
     return -1;
 }
 
+// retorna o tamanho do quantum de acordo com a prioridade. Se a prioridade for invalida, retorna 0
 int tamanhoQuantumPrioridade(int prioridade){
     switch (prioridade){
         case 0:
