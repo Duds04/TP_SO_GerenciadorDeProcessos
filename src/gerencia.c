@@ -7,12 +7,45 @@
 #include "instrucao.h"
 #include "tabela.h"
 #include "cpu.h"
+#include "filasMultiplas.h"
+#include "filasID.h"
 
 #define BUF_MAX 64
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e número de
 // CPUs a ser utilizado na simulação
 void gerencia_main(int controle_fd, int num_cpus) {
+    // FILE *init = fopen("init", "r");
+    // if(init == NULL) {
+    //     fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
+    //     return;
+    // }
+    // // Carrega o processo inicial do arquivo init
+    // TListaInstrucao programa_init;
+    // liIniciaLista(&programa_init);
+    // int num_regs = carrega_executavel(&programa_init, init);
+    // fclose(init);
+
+    // // Inicializa a tabela de processos com o processo inicial apenas
+    // TTabelaProcesso tabela;
+    // tpIniciaLista(&tabela);
+    // int id = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+
+    // // Inicializa a lista de bloqueados
+    // ListaBloqueados bloq;
+    // bloqueados_inicia(&bloq);
+
+    // // Inicializa a CPU
+    // CPU cpu;
+    // inicializaCPU(&cpu, &tabela, &bloq);
+    // // Temporário! A CPU provavelmente deveria carregar o processo inicial
+    // // sozinha, na função de executar a próxima instrução
+    // carregaProcesso(&cpu, id, 5);
+
+    fprintf(stderr, "KSkds");
+
+
+
     FILE *init = fopen("init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
@@ -24,10 +57,27 @@ void gerencia_main(int controle_fd, int num_cpus) {
     int num_regs = carrega_executavel(&programa_init, init);
     fclose(init);
 
+    PfilasPrioridades filas;
+    inicializaFilas(filas);
+
+
     // Inicializa a tabela de processos com o processo inicial apenas
     TTabelaProcesso tabela;
     tpIniciaLista(&tabela);
-    int id = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+    int id[5];
+    id[0] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+    id[1] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+    id[2] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+    id[3] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+    id[4] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
+
+    colocaProcesso(&tabela, filas, id[0], 0);
+    colocaProcesso(&tabela, filas, id[1], 0);
+    colocaProcesso(&tabela, filas, id[2], 0);
+    colocaProcesso(&tabela, filas, id[3], 0);
+    imprimeFilasMultiplas(filas);
+
+
 
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
@@ -38,7 +88,9 @@ void gerencia_main(int controle_fd, int num_cpus) {
     inicializaCPU(&cpu, &tabela, &bloq);
     // Temporário! A CPU provavelmente deveria carregar o processo inicial
     // sozinha, na função de executar a próxima instrução
-    carregaProcesso(&cpu, id, 5);
+    // carregaProcesso(&cpu, id, 5);
+
+
 
     bool ok = true;
     char buf[BUF_MAX];

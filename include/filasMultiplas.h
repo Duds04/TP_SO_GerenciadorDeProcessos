@@ -7,11 +7,11 @@
 
 // Definindo uma estrutura para armazenar as filas multiplas
 
-typedef TfilasPrioridades* PfilasPrioridades;
 typedef struct {
     int numCPUs;     // Numero de CPUs
     PFilaId vetorPrioridades[4]; // Vetor de prioridades
 }TfilasPrioridades;
+typedef TfilasPrioridades* PfilasPrioridades;
 
 
 int inicializaFilas(PfilasPrioridades filas);
@@ -25,5 +25,7 @@ int retiraProcesso(PfilasPrioridades filas);
 
 // retorna o tamanho do quantum de acordo com a prioridade. Se a prioridade for invalida, retorna 0
 int tamanhoQuantumPrioridade(int prioridade);
+
+void imprimeFilasMultiplas(PfilasPrioridades filas);
 
 #endif 

@@ -100,3 +100,11 @@ int tamanhoQuantumPrioridade(int prioridade){
             return 0;
     }
 }
+
+void imprimeFilasMultiplas(PfilasPrioridades filas){
+    fprintf(stderr, "Filas multiplas: \n");
+    for (int i = 0; i < 4; i++){
+        fprintf(stderr, "Fila de prioridade %d: \n", i);
+        imprimeFila(filas->vetorPrioridades[i]);
+    }
+}
