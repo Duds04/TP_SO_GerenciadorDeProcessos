@@ -2,87 +2,100 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "robin.h"
+#include "filasMultiplas.h"
+#include "processo.h"
 
-// Macro
-// BitWise, substitui mod (dado que capacidade é potencia de 2) 
-#define INC_MOD(i, cap) (((i) + 1) & ((cap) - 1))
 
-void robin_inicia(FilaRobin *r) {
-    r->id_processos = (int*) malloc(sizeof(int) * CAP_INICIAL);
-    if(r->id_processos == NULL) {
-        fprintf(stderr, "[!] Sem memória suficiente\n");
-        exit(64);
+
+int inicializaFilas(PfilasPrioridades filas){
+    for (int i = 0; i < 4; i++){
+        filas->vetorPrioridades[i] = NULL;
     }
-    r->primeiro = 0;
-    r->ultimo = 0; 
-    r->capacidade = CAP_INICIAL;
-}
-
-void robin_libera(FilaRobin *r) {
-    free(r->id_processos);
-    r->primeiro = r->ultimo = 0;
-    r->capacidade = 0;
-}
-
-static void robin_aumenta(FilaRobin *r) {
-    int count = 0;
-    int* aux = (int*) malloc(sizeof(int) * r->capacidade * 2);
-    if(aux == NULL) {
-        fprintf(stderr, "[!] Realocação robin falhada\n");
-        exit(64);
+    for (int i = 0; i < 4; i++){
+        filas->vetorPrioridades[i] = inicializaFilas(filas->vetorPrioridades[i]);
+        if (filas->vetorPrioridades[i] == NULL){
+            for (int j = 0; j < i; j++){
+                filas->vetorPrioridades[j] == NULL;
+            }
+            return 0;
+        }
     }
-    
-    for(int i = r->primeiro; i != r->ultimo; i = INC_MOD(i, r->capacidade)){
-        aux[count] = r->id_processos[i];
-        count++;
+}
+
+// Recebe o id do processo e o estado anterior do processo (bloqueado ou execucao) e coloca o processo no escalonador. Retorna 1 se der errado
+int colocaProcesso(const* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior){
+    Tprocesso* processo = NULL;
+    processo = tpAcessaProcesso(tabelaProcesso, idProcesso);
+    if (processo == NULL){
+        printf("> EM FILAS MULTIPLAS: Processo nao encontrado\n");
+        return 1;
+    } 
+    int prioridade = processo->prioridade;
+    // se o estado anterior era pronto, a sua prioridade diminui
+    if (estadoAnterior == EST_PRONTO){
+
+        if (prioridade < 3){ // Se a prioridade for 3, o processo já está na fila de prioridade máxima
+            if (!enfileirar(filas->vetorPrioridades[prioridade++], idProcesso)) {
+                printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
+                return 1;
+            }
+            processo->prioridade++;
+            return 0;
+        }
+        else {
+            if (!enfileirar(filas->vetorPrioridades[3], idProcesso)){
+                printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
+                return 1;
+            }
+        }
+
+    } 
+    else if (estadoAnterior == EST_BLOQUEADO){
+        if (prioridade > 0){ // Se a prioridade for 3, o processo já está na fila de prioridade máxima
+            if (!enfileirar(filas->vetorPrioridades[prioridade--], idProcesso)) {
+                printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
+                return 1;
+            }
+            processo->prioridade--;
+            return 0;
+        }
+        else {
+            if (!enfileirar(filas->vetorPrioridades[0], idProcesso)){
+                printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
+                return 1;
+            }
+        }
     }
-    free(r->id_processos);
-    r->id_processos = aux;
-    
-    r->capacidade *= 2;
-    r->primeiro = 0;
-    r->ultimo = count;
-}
-
-int robin_retira(FilaRobin *r) {
-    if(robin_vazio(r)) {
-        fprintf(stderr, "[?] Tentativa de retirar de uma fila robin vazia\n");
-        return -1;
+    else {
+        printf("> EM FILAS MULTIPLAS: Estado anterior invalido\n");
+        return 1;
     }
-    int escolhido = r->id_processos[r->primeiro];
-    r->primeiro = INC_MOD(r->primeiro, r->capacidade);
-    return escolhido;
-}
+    return 0;
 
-static bool robin_cheio(const FilaRobin *r) {
-    return r->primeiro == INC_MOD(r->ultimo, r->capacidade);
 }
-
-void robin_adiciona(FilaRobin *r, int id_processo) {
-    // verifica se está cheio 
-    if(robin_cheio(r))
-        robin_aumenta(r);
-    r->id_processos[r->ultimo] = id_processo;
-    r->ultimo = INC_MOD(r->ultimo, r->capacidade);
-}
-
-// Checa se a fila está vazia
-bool robin_vazio(const FilaRobin *r) {
-    return r->primeiro == r->ultimo;
-}
-
-void robin_imprime(const FilaRobin *r){
-    if(robin_vazio(r)) {
-        printf("[]\n");
-        return;
+// Retorna o id do processo a ser executado na vez atual. Retorna -1 se não houver processo a ser executado
+int retiraProcesso(PfilasPrioridades filas){
+    for (int i = 0; i < 4; i++){
+        if (!estaVazia(filas->vetorPrioridades[i])) continue; // Avanca para a proxima lista
+        else {
+            return desenfileirar(filas->vetorPrioridades[i]);
+        }
     }
-    printf("[%d", r->id_processos[r->primeiro]);
-    int segundo = INC_MOD(r->primeiro, r->capacidade);
-    for(int i = segundo; i != r->ultimo; i = INC_MOD(i, r->capacidade)){
-        printf(" %d", r->id_processos[i]);
-    }
-    printf("]\n");
+    return -1;
 }
 
-#undef INC_MOD
+int tamanhoQuantumPrioridade(int prioridade){
+    switch (prioridade){
+        case 0:
+            return 1;
+        case 1:
+            return 2;
+        case 2:
+            return 4;
+        case 3:
+            return 8;
+        default:
+            printf("> EM FILAS MULTIPLAS: Prioridade invalida\n");
+            return 0;
+    }
+}

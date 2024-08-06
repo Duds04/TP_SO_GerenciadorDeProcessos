@@ -2,7 +2,7 @@
 #define FILAS_MULTIPLAS_H
 
 #include "filasID.h"
-
+#include "tabela.h"
 #include <stdbool.h>
 
 // Definindo uma estrutura para armazenar as filas multiplas
@@ -10,24 +10,23 @@
 typedef TfilasPrioridades* PfilasPrioridades;
 typedef struct {
     int numCPUs;     // Numero de CPUs
-    int vetorPrioridades[4]; // Vetor de prioridades
-    int vetBloqueados[4]; // Vetor de bloqueados
+    PFilaId vetorPrioridades[4]; // Vetor de prioridades
 }TfilasPrioridades;
 
 
-/*
+int inicializaFilas(PfilasPrioridades filas);
 
-    Inicializa as filas multiplas
-    cada vetor é uma fila
-    quando acaba o slot de tempo, se nao terminou 
+int colocaProcesso(const* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior);
+
+// int retiraProcesso(PfilasPrioridades filas, int idProcesso);
 
 
-*/
+
 // tem que ter uma função que vai ser chamado pela cpu pra retorna o processo da vez
 
 // cpu chama funçao que tira processo da lista de filas multiplas
 
-// 
+// se o processo estava bloqueado ou não vai ser passado como parametro pela CPU
 
 // 
 
@@ -67,3 +66,4 @@ typedef struct {
 // processo entrou para bloqueado = prioridade aumenta
 
 // filas multiplas será vetor
+#endif 

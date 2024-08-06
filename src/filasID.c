@@ -1,15 +1,17 @@
-#include "../include/filasID.h"
+#include "filasID.h"
 
 // Funcao para inicializar a fila
 bool inicializarFila(PFilaId fila) {
     fila->primeiro = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
     if (fila->primeiro == NULL){
+        printf("> EM FILAS ID: Erro ao alocar memoria para celula cabeca na inicializaçao\n");
         return false;
     }
     fila->ultimo = fila->primeiro;
     fila->primeiro->proxId = NULL;
     fila->primeiro->idProcesso = -1;  
-    printf("Fila inicializada com sucesso!\n");
+    // printf("Fila inicializada com sucesso!\n");
+    return true;
 }
 
 // Funcao para verificar se a fila esta vazia
@@ -23,6 +25,7 @@ bool enfileirar(PFilaId fila, int idProcesso){
     novo->idProcesso = idProcesso;
     novo->proxId = NULL;
     if (novo == NULL){
+        printf("> EM FILAS ID: Erro ao alocar memoria para nova celula\n");
         return false;
     }
     fila->ultimo->proxId = novo;
@@ -31,26 +34,44 @@ bool enfileirar(PFilaId fila, int idProcesso){
     return true;
 }
 
-// Funcao para desenfileirar um processo da fila
-bool desenfileirar(PFilaId fila, int idProcesso){
+// Funcao para desenfileirar um processo da fila. retorna -1 se a fila estiver vazia
+int desenfileirar(PFilaId fila){
+    int idProcesso;
     if (estaVazia(fila)){
-        return false;
+        printf("> EM FILAS ID: Fila vazia\n");
+        return -1;
     }
+    idProcesso = fila->primeiro->idProcesso;
     PCelulaFilaId aux = fila->primeiro;
     fila->primeiro = fila->primeiro->proxId;
     free(aux);
-    return true;
+    return idProcesso;
 }
 
 // Funcao para liberar a memoria alocada para a fila
 void liberarFila(PFilaId fila){
+    if (!estaVazia(fila)){
+        PCelulaFilaId aux = fila->primeiro->proxId;
+        PCelulaFilaId auxFree = NULL;
+        printf("> EM FILAS ID: Liberando memoria alocada para fila\n");
+        while (aux != NULL)
+        {
+            auxFree = aux;
+            aux = aux->proxId;
+            free(auxFree);
+        } 
+        free(aux);
+    }
+    free(fila->primeiro);
+    fila = NULL;
+    printf("> EM FILAS ID: Fila liberada com sucesso\n");
     return 0;
 }
 
 void imprimeFila(PFilaId fila){
     PCelulaFilaId aux;
         if (fila == NULL || fila->primeiro == NULL) {
-        printf("Fila is not properly initialized.\n");
+        printf("> EM FILAS ID: Fila nao inicializada corretamente.\n");
         return;
     }
     aux = fila->primeiro->proxId;
@@ -66,7 +87,7 @@ int retiraProcessoFila(PFilaId fila, int idProcesso){
     PCelulaFilaId aux;
     PCelulaFilaId aux2;
     if (fila == NULL || fila->primeiro == NULL) {
-        printf("Fila is not properly initialized.\n");
+        printf("> EM FILA ID: fila nao foi iniciaizada corretamente \n");
         return -1;
     }
     aux = fila->primeiro;
