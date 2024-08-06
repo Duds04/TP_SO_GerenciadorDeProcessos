@@ -58,3 +58,19 @@ void processo_libera(Tprocesso *proc) {
     liLiberaLista(&proc->codigo);
     free(proc->reg);
 }
+
+void substituiPrograma(Tprocesso *proc, TListaInstrucao codigo, int num_regs) {
+    processo_libera(&proc->codigo);
+    proc->codigo = codigo;
+    proc->pc = 0;
+
+    // Aloca a quantidade de registradores necessários
+    proc->reg = (int*) calloc(num_regs, sizeof(int));
+    if(proc->reg == NULL) {
+        fprintf(stderr, "[!] Sem memória suficiente\n");
+        exit(64);
+    }
+    proc->num_regs = num_regs;
+
+}
+

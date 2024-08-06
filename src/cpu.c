@@ -91,7 +91,22 @@ static void instrucaoF(int n, TTabelaProcesso* tabelaProcessos, int prioridade, 
 }
 
 // Substitui o programa de um processo
-//static void substituiPrograma(const char* nome_do_arquivo, Tprocesso* processo, int* pcProcessoNovo);
+static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
+    FILE* arquivo = fopen(nome_do_arquivo, "r");
+    if(arquivo == NULL) {
+        fprintf(stderr, "[!] Falha ao abrir o arquivo %s\n", nome_do_arquivo);
+        exit(1);
+    }
+    
+    Tprocesso* processo = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual);
+
+    TListaInstrucao novoCodigo;
+    int num_regs = carrega_executavel(&novoCodigo, arquivo);
+    fclose(arquivo);
+
+    substituiPrograma(processo, novoCodigo, num_regs);
+    cpu->pc = 0;
+}
 
 
 void executaProximaInstrucao(CPU *cpu) {
@@ -137,12 +152,13 @@ void executaProximaInstrucao(CPU *cpu) {
             prioridade = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual)->prioridade;
             instrucaoF(instrucao.arg0, cpu->pTabela, prioridade, cpu);
             break;
-        /* case 'R':
-            substituiPrograma(instrucao.arq, processo, &cpu->pc);
-            break; */
+        case 'R':
+            instrucaoR(instrucao.arq, cpu);
+            break; 
         default:
             fprintf(stderr, "[!] Instrução inválida\n");
     }
+
     cpu->pc += 1;
-    cpu->quantum -= 1;
+    cpu->quantum -= 1; // a cada instrução executada decrementa o quantum
 }

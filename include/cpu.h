@@ -6,6 +6,7 @@
 #include "tabela.h"
 #include "instrucao.h"
 #include "bloqueados.h"
+#include "processo.h"
 
 // Estado atual da CPU
 typedef struct {

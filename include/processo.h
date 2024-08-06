@@ -32,4 +32,7 @@ void processo_imprime(const Tprocesso *proc);
 // Desaloca a memória associada a um processo
 void processo_libera(Tprocesso *proc);
 
+// Substituir código de um processo]
+void substituiPrograma(Tprocesso *proc, TListaInstrucao codigo, int num_regs);
+
 #endif // PROCESSO_H
