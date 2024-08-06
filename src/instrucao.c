@@ -112,6 +112,19 @@ void liLiberaLista(TListaInstrucao *pLista){
     free(pLista->intrucoes);
 }
 
+// Faz uma cópia profunda da lista de instruções
+void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst) {
+    Instrucao *aux = (Instrucao*) malloc(dst->tamanho * sizeof(Instrucao));
+    if(aux == NULL) {
+        printf("Erro ao alocar memória!");
+        exit(1);
+    }
+    memcpy(aux, src->intrucoes, src->ultimo * sizeof(Instrucao));
+    dst->intrucoes = aux;
+    dst->ultimo = src->ultimo;
+    dst->tamanho = src->tamanho;
+}
+
 // Carrega um arquivo completo como uma lista de instruções. Retorna um número
 // positivo de registradores que devem ser alocados para o programa
 int carrega_executavel(TListaInstrucao *prog, FILE *arq) {

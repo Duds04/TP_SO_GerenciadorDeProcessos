@@ -1,129 +1,119 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "cpu.h"
+#include "tabela.h"
 
-void inicializaCPU(CPU* cpu, TTabelaProcesso *pLista, ListaBloqueados* listaBloqueados)
-{
-    cpu->pidProcessoAtual = -1;
-    cpu->PC = 0;
-    cpu->Quantum = 0;
+// Inicializa a CPU com referências à módulos externos necessários à sua operação
+void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista, ListaBloqueados* listaBloqueados) {
+    zeraCPU(cpu);
     cpu->pTabela = pLista;
     cpu->listaBloqueados = listaBloqueados;
-    cpu->reg = NULL;
-    cpu->num_regs = 0;
 }
 
-
-int cpuIsLivre(CPU* cpu)
-{
+// Checa se não há nenhum processo carregado
+bool cpuIsLivre(const CPU *cpu) {
     return cpu->pidProcessoAtual == -1;
 }
 
-// reseta a CPU
-void zeraCPU(CPU* cpu)
-{
-    cpu->pidProcessoAtual = -1;
-    cpu->PC = 0;
-    cpu->Quantum = 0;
+// Deixa a CPU zerada
+void zeraCPU(CPU *cpu) {
     cpu->pTabela = NULL;
+    cpu->listaBloqueados = NULL;
+
+    cpu->tempo = 0;
+    cpu->pidProcessoAtual = -1;
+    cpu->pc = 0;
+    cpu->quantum = 0;
     cpu->reg = NULL;
     cpu->num_regs = 0;
-    cpu->listaBloqueados = NULL;
+    cpu->codigo = NULL;
 }
 
-void carregaProcesso(CPU* cpu, int pidProcessoAtual, int QuantumProcessoAtual)
-{
+// Carrega um processo na CPU pelo ID, com quantum fixo
+void carregaProcesso(CPU *cpu, int pidProcessoAtual, int QuantumProcessoAtual) {
     Tprocesso* processo = tpAcessaProcesso(cpu->pTabela, pidProcessoAtual);
-    if(processo == NULL)
-    {
+    if(processo == NULL) {
         fprintf(stderr, "[!] Processo %d não encontrado\n", pidProcessoAtual);
         exit(1);
     }
-
     cpu->pidProcessoAtual = pidProcessoAtual;
-    cpu->PC = processo->pc;
-    cpu->Quantum = QuantumProcessoAtual;
+    cpu->pc = processo->pc;
+    cpu->quantum = QuantumProcessoAtual;
     cpu->reg = processo->reg;
     cpu->num_regs = processo->num_regs;
+    cpu->codigo = &processo->codigo;
 }
 
-// Executar instruções
-
 // Define o número de variáveis declaradas no processo
-static int* instrucaoN(CPU* cpu){
+// NOTA: essa função não seria invocada na prática, pois a instrução N é
+// tratada na leitura dos processos
+static int instrucaoN(CPU *cpu) {
     return cpu->num_regs;
 }
 
-// Declaração de variáveis, (informando que existem a variável x)
-static void instrucaoD(int x, CPU* cpu){
+// Declaração de variáveis, (informando que existe a variável x)
+static void instrucaoD(int x, CPU *cpu) {
     cpu->reg[x] = 0;
 }
 
 // Atribuição de valor a variável
-static void instrucaoV(int x, int n, CPU* cpu){
+static void instrucaoV(int x, int n, CPU *cpu){
     cpu->reg[x] = n;
 }
 
  // Adição de um valor ao valor da variável
-static void instrucaoA(int x, int n, CPU* cpu){
+static void instrucaoA(int x, int n, CPU *cpu){
     cpu->reg[x] =  cpu->reg[x] + n;
 }
 // Subtração de um valor ao valor da variável
-static void instrucaoS(int x, int n, CPU* cpu){
+static void instrucaoS(int x, int n, CPU *cpu){
      cpu->reg[x] =  cpu->reg[x] - n;
 }
 // Bloqueio de processo por n unidades de tempo
-static void instrucaoB(int n, CPU* cpu){
-    tbBloqueiaProcesso(cpu->listaBloqueados, cpu->pidProcessoAtual, n);
+static void instrucaoB(int n, CPU *cpu) {
+    bloqueados_insere(cpu->listaBloqueados, cpu->pidProcessoAtual, n);
+    tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual)->estado = EST_BLOQUEADO;
 }
 // Término de processo
-static void instrucaoT(CPU* cpu){
+static void instrucaoT(CPU *cpu){
     tpFinalizaProcesso(cpu->pTabela, cpu->pidProcessoAtual);
+    cpu->pidProcessoAtual = -1;
 }
 
 // Cria um novo processo
-static void instrucaoF(int n, int pidProcessoAtual, int* pcProcessoAtual, TTabelaProcesso* tabelaProcessos){
-    tpCriaProcesso(tabelaProcessos, n, pidProcessoAtual, pcProcessoAtual);
-} 
+static void instrucaoF(int n, TTabelaProcesso* tabelaProcessos, int prioridade, CPU *cpu) {
+    TListaInstrucao novoCodigo;
+    liCopiaProfunda(cpu->codigo, &novoCodigo);
+    tpAdicionaProcesso(tabelaProcessos, cpu->pidProcessoAtual, cpu->pc + n,
+            prioridade, cpu->num_regs, novoCodigo, cpu->tempo);
+}
+
 // Substitui o programa de um processo
-static void substituiPrograma(const char* nome_do_arquivo, Tprocesso* processo, int* pcProcessoNovo); 
+//static void substituiPrograma(const char* nome_do_arquivo, Tprocesso* processo, int* pcProcessoNovo);
 
 
-void executaProximaInstrucao(CPU* cpu)
-{
-    if(cpu->pidProcessoAtual == -1)
-    {
+void executaProximaInstrucao(CPU *cpu) {
+    if(cpu->pidProcessoAtual == -1) {
         fprintf(stderr, "[!] CPU vazia\n");
         exit(1);
     }
-
-    Tprocesso* processo = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual);
-    if(processo == NULL)
-    {
-        fprintf(stderr, "[!] Processo %d não encontrado\n", cpu->pidProcessoAtual);
-        exit(1);
-    }
-
-    if(cpu->Quantum == 0)
-    {
+    if(cpu->quantum == 0) {
         fprintf(stderr, "[!] Processo %d excedeu o quantum\n", cpu->pidProcessoAtual);
         exit(1);
     }
-
-    if(cpu->PC >= processo->codigo.tamanho)
-    {
+    if(cpu->pc >= cpu->codigo->ultimo) {
         fprintf(stderr, "[!] Processo %d excedeu o tamanho do programa\n", cpu->pidProcessoAtual);
         exit(1);
     }
 
-    
-
-    Instrucao instrucao = processo->codigo.intrucoes[cpu->PC];
-    switch(instrucao.op)
-    {
+    cpu->tempo += 1;
+    int prioridade;
+    Instrucao instrucao = cpu->codigo->intrucoes[cpu->pc];
+    switch(instrucao.op) {
         case 'N':
-            instrucaoN(instrucao.arg0);
+            instrucaoN(cpu);
             break;
         case 'D':
             instrucaoD(instrucao.arg0, cpu);
@@ -144,15 +134,15 @@ void executaProximaInstrucao(CPU* cpu)
             instrucaoT(cpu);
             break;
         case 'F':
-            instrucaoF(instrucao.arg0, cpu->pidProcessoAtual, &cpu->PC, cpu->pTabela);
+            prioridade = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual)->prioridade;
+            instrucaoF(instrucao.arg0, cpu->pTabela, prioridade, cpu);
             break;
-        case 'R':
-            substituiPrograma(instrucao.arq, processo, &cpu->PC);
-            break;
+        /* case 'R':
+            substituiPrograma(instrucao.arq, processo, &cpu->pc);
+            break; */
         default:
             fprintf(stderr, "[!] Instrução inválida\n");
     }
-
-    cpu->PC += 1;
-    cpu->Quantum++;
+    cpu->pc += 1;
+    cpu->quantum -= 1;
 }
