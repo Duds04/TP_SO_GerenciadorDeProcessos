@@ -1,24 +1,21 @@
-#ifdef FILASID_H
-#endif FILASID_H
-
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-typedef TCelulaFilaId* PCelulaFilaId;
-typedef struct {
+typedef struct TCelula {
     int idProcesso;
-    
-    PCelulaFilaId proxId;
+    struct TCelula* proxId;
 }TCelulaFilaId;
+typedef TCelulaFilaId* PCelulaFilaId;
 
-typedef TFilaId* PFilaId;
 typedef struct {
     PCelulaFilaId primeiro;
     PCelulaFilaId ultimo;
 }TFilaId;
+typedef TFilaId* PFilaId;
 
 // Inicia fila com null 
-void inicializarFila(PFilaId fila); // cria a cabeça e seta idProcesso para NULL
+bool inicializarFila(PFilaId fila); // cria a cabeça e seta idProcesso para NULL
 
 // Funcao para verificar se a fila esta vazia ( se o prox da cabça é null)
 bool estaVazia(PFilaId fila);
@@ -31,3 +28,7 @@ bool desenfileirar(PFilaId fila, int idProcesso); // tira o PRIMEIRO da lista
 
 // Funcao para liberar a memoria alocada para a fila
 void ApagaFila(PFilaId fila); 
+
+void imprimeFila(PFilaId fila);
+
+int retiraProcessoFila(PFilaId fila, int idProcesso);
