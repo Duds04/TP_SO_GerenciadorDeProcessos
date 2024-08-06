@@ -109,7 +109,7 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
 }
 
 
-void executaProximaInstrucao(CPU *cpu) {
+void executaProximaInstrucao(CPU *cpu, void *Escalonador) {
     if(cpu->pidProcessoAtual == -1) {
         fprintf(stderr, "[!] CPU vazia\n");
         exit(1);
@@ -147,6 +147,7 @@ void executaProximaInstrucao(CPU *cpu) {
             break;
         case 'T':
             instrucaoT(cpu);
+            // CHAMAR ESCALONADOR
             break;
         case 'F':
             prioridade = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual)->prioridade;

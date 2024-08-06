@@ -29,12 +29,13 @@ void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista,
 void carregaProcesso(CPU *cpu, int pidProcessoAtual, int QuantumProcessoAtual);
 
 // Executa a próxima instrução do processo atual
-void executaProximaInstrucao(CPU *cpu);
+void executaProximaInstrucao(CPU *cpu, void *Escalonador);
 
 // Checa se não há nenhum processo carregado
 bool cpuIsLivre(const CPU *cpu);
 
 // Deixa a CPU zerada
 void zeraCPU(CPU *cpu);
+
 
 #endif // CPU_H
