@@ -26,6 +26,9 @@ void liImprimeLista(const TListaInstrucao* pLista, int inicio);
 void liImprimeInstrucao(Instrucao instrucao);
 void liLiberaLista(TListaInstrucao *pLista);
 
+// Faz uma cópia profunda da lista de instruções
+void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst);
+
 // Carrega um arquivo completo como uma lista de instruções. Retorna um número
 // positivo de registradores que devem ser alocados para o programa
 int carrega_executavel(TListaInstrucao *prog, FILE *arq);

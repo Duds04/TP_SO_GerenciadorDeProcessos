@@ -1,7 +1,7 @@
 CFLAGS=-Wall -Wextra -ggdb -std=c11
 INCDIR=include
 
-controle: main.o gerencia.o instrucao.o processo.o tabela.o bloqueados.o robin.o loteria.o
+controle: main.o gerencia.o instrucao.o processo.o tabela.o bloqueados.o robin.o cpu.o
 	$(CC) -o $@ $^
 
 main.o: src/main.c
@@ -25,7 +25,10 @@ bloqueados.o: src/bloqueados.c include/bloqueados.h
 robin.o: src/robin.c include/robin.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-loteria.o: src/loteria.c include/loteria.h
+#loteria.o: src/loteria.c include/loteria.h
+#	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
+
+cpu.o: src/cpu.c include/cpu.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 .PHONY: clean

@@ -24,8 +24,8 @@ static void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista){
     pLista->tamanho = pLista->tamanho*2;
 }
 
-// Adiciona um processo à tabela
-void tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
+// Adiciona um processo à tabela, retornando seu ID
+int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
         int prioridade, int num_regs, TListaInstrucao codigo, int tempoInicio) {
     // Procura para ver se há algum processo finalizado na tabela
     int id = -1;
@@ -47,6 +47,7 @@ void tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
     processo_inicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
             tempoInicio);
     pLista->processos[id] = proc;
+    return id;
 }
 
 // Finaliza um processo na tabela
