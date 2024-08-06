@@ -66,6 +66,8 @@ void gerencia_main(int controle_fd) {
                     printf("Recebi um %c\n", buf[i]);
                     // Aqui a instrução que o processo recebeu via pipe (recebeu
                     // do processo de controle) deve ser executada
+
+                    // GERENCIADORES DE PROCESSOS ESTARÂO AQUI DENTRO
             }
         }
     }

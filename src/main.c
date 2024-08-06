@@ -45,6 +45,11 @@ int main() {
                 && entrada[1] == '\0') {
             // Comando de simulação dado é válido e deve ser escrito no pipe
             write(chan[1], entrada, 1);
+            // Imediatamente após o processo pai escrever a entrada no terminal, o programa o repassa para o processo filho
+            // ------
+            // ------
+            // ------
+            // Processo filho termina
             if(entrada[0] == 'M') break; // controle encerra aqui
             continue;
         }
