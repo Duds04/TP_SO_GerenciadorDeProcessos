@@ -117,6 +117,7 @@ void executaProximaInstrucao(CPU *cpu, void *Escalonador) {
     if(cpu->quantum == 0) {
         fprintf(stderr, "[!] Processo %d excedeu o quantum\n", cpu->pidProcessoAtual);
         exit(1);
+        // CHAMAR ESCALONADOR
     }
     if(cpu->pc >= cpu->codigo->ultimo) {
         fprintf(stderr, "[!] Processo %d excedeu o tamanho do programa\n", cpu->pidProcessoAtual);
