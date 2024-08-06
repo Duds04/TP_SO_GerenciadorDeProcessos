@@ -12,8 +12,8 @@ typedef struct TTabelaProcesso {
 
 void tpIniciaLista(TTabelaProcesso *pLista);
 
-// Adiciona um processo à tabela
-void tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
+// Adiciona um processo à tabela, retornando seu ID
+int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
         int prioridade, int num_regs, TListaInstrucao codigo, int tempoInicio);
 
 // Finaliza um processo na tabela
