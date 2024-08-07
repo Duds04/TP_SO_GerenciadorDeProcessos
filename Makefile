@@ -28,9 +28,6 @@ robin.o: src/robin.c include/robin.h
 filasID.o: src/filasID.c include/filasID.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-#loteria.o: src/loteria.c include/loteria.h
-#	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
-
 cpu.o: src/cpu.c include/cpu.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 

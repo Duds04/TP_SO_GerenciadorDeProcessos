@@ -1,17 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "filasID.h"
 
 // Funcao para inicializar a fila
 bool inicializaFila(PFilaId fila) {
     fila->primeiro = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
 
-    if (fila->primeiro == NULL){
+    if (fila->primeiro == NULL) {
         printf("> EM FILAS ID: Erro ao alocar memoria para celula cabeca na inicializaçao\n");
         return false;
     }
 
     fila->ultimo = fila->primeiro;
     fila->primeiro->proxId = NULL;
-    fila->primeiro->idProcesso = -1;  
+    fila->primeiro->idProcesso = -1;
     // printf("Fila inicializada com sucesso!\n");
     return true;
 }
@@ -24,7 +26,7 @@ bool estaVazia(PFilaId fila) {
 // Funcao para enfileirar um novo processo na fila
 bool enfileirar(PFilaId fila, int idProcesso){
     PCelulaFilaId novo = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
-    
+
     if (novo == NULL){
         printf("> EM FILAS ID: Erro ao alocar memoria para nova celula\n");
         return false;
@@ -35,7 +37,7 @@ bool enfileirar(PFilaId fila, int idProcesso){
 
     fila->ultimo->proxId = novo;
     fila->ultimo = novo;
-    
+
     return true;
 }
 
@@ -47,7 +49,7 @@ int desenfileirar(PFilaId fila){
         printf("> EM FILAS ID: Fila vazia\n");
         return -1;
     }
-    
+
     PCelulaFilaId aux = fila->primeiro->proxId;
     idProcesso = aux->idProcesso;
     fila->primeiro->proxId = aux->proxId;
@@ -71,13 +73,13 @@ void liberarFila(PFilaId fila){
             auxFree = aux;
             aux = aux->proxId;
             free(auxFree);
-        } 
+        }
         free(aux);
     }
     free(fila->primeiro);
     fila = NULL;
     printf("> EM FILAS ID: Fila liberada com sucesso\n");
-    return 0;
+    return;
 }
 
 void imprimeFila(PFilaId fila){
@@ -86,16 +88,16 @@ void imprimeFila(PFilaId fila){
         printf("> EM FILAS ID: Fila nao inicializada corretamente.\n");
         return;
     }
-    
+
     aux = fila->primeiro->proxId;
     while (aux != NULL)
-    {   
+    {
         // fprintf(stderr, "TESTE");
         fprintf(stderr, "%i ", aux->idProcesso);
         aux = aux->proxId;
     }
     fprintf(stderr, "\n");
-    
+
 }
 
 int retiraProcessoFila(PFilaId fila, int idProcesso){

@@ -1,23 +1,26 @@
 #ifndef FILAS_H
 #define FILAS_H
+
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+
+// Implementação de fila com lista encadeada
 
 typedef struct TCelula {
     int idProcesso;
     struct TCelula* proxId;
-}TCelulaFilaId;
+} TCelulaFilaId;
+
 typedef TCelulaFilaId* PCelulaFilaId;
 
 typedef struct {
     PCelulaFilaId primeiro;
     PCelulaFilaId ultimo;
-}TFilaId;
+} TFilaId;
+
 typedef TFilaId* PFilaId;
 
-// Inicia fila com null 
-bool inicializaFila(PFilaId fila); // cria a cabeça e seta idProcesso para NULL
+// Inicia fila vazia
+bool inicializaFila(PFilaId fila);
 
 // Funcao para verificar se a fila esta vazia ( se o prox da cabça é null)
 bool estaVazia(PFilaId fila);
@@ -26,10 +29,10 @@ bool estaVazia(PFilaId fila);
 bool enfileirar(PFilaId fila, int idProcesso);
 
 // Funcao para desenfileirar um processo da fila
-int desenfileirar(PFilaId fila); // tira o PRIMEIRO da lista
+int desenfileirar(PFilaId fila);
 
 // Funcao para liberar a memoria alocada para a fila
-void ApagaFila(PFilaId fila); 
+void ApagaFila(PFilaId fila);
 
 void imprimeFila(PFilaId fila);
 

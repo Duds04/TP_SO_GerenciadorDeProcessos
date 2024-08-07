@@ -65,7 +65,7 @@ void processo_libera(Tprocesso *proc) {
 }
 
 void substituiPrograma(Tprocesso *proc, TListaInstrucao codigo, int num_regs) {
-    processo_libera(&proc->codigo);
+    processo_libera(proc);
     proc->codigo = codigo;
     proc->pc = 0;
 

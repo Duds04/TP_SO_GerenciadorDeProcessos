@@ -24,9 +24,14 @@ static void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista){
     pLista->tamanho = pLista->tamanho*2;
 }
 
-// Adiciona um processo à tabela, retornando seu ID
+// Adiciona um processo à tabela, retornando seu ID. O processo herda a
+// a prioridade do pai ou tem prioridade 0, caso não tenha pai
 int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
-        int prioridade, int num_regs, TListaInstrucao codigo, int tempoInicio) {
+        int num_regs, TListaInstrucao codigo, int tempoInicio) {
+    if(id_pai >= pLista->ultimo) {
+        fprintf(stderr, "[!] ID %d inválido\n", id_pai);
+        exit(1);
+    }
     // Procura para ver se há algum processo finalizado na tabela
     int id = -1;
     for(int i = 0; i < pLista->ultimo; ++i) {
@@ -44,6 +49,7 @@ int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
         id = pLista->ultimo;
         pLista->ultimo++;
     }
+    int prioridade = (id_pai < 0) ? 0 : pLista->processos[id_pai].prioridade;
     processo_inicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
             tempoInicio);
     pLista->processos[id] = proc;

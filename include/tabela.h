@@ -12,9 +12,10 @@ typedef struct TTabelaProcesso {
 
 void tpIniciaLista(TTabelaProcesso *pLista);
 
-// Adiciona um processo à tabela, retornando seu ID
+// Adiciona um processo à tabela, retornando seu ID. O processo herda a
+// a prioridade do pai ou tem prioridade 0, caso não tenha pai
 int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
-        int prioridade, int num_regs, TListaInstrucao codigo, int tempoInicio);
+        int num_regs, TListaInstrucao codigo, int tempoInicio);
 
 // Finaliza um processo na tabela
 void tpFinalizaProcesso(TTabelaProcesso *pLista, int id);

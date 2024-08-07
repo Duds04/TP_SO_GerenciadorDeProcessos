@@ -2,7 +2,7 @@
 #define INSTRUCAO_H
 
 #include <stdio.h>
-#define TAM_INIT 8
+#define TAM_INIT 32
 
 typedef struct {
     char op;            // código de operação: N, D, V, A, S, B, T, F ou R

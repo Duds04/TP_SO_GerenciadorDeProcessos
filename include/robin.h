@@ -12,7 +12,6 @@ typedef struct {
     int capacidade;
 } FilaRobin;
 
-
 void robin_inicia(FilaRobin *r);
 
 void robin_libera(FilaRobin *r);

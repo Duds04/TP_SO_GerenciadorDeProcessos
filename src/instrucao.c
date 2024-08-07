@@ -137,10 +137,9 @@ int carrega_executavel(TListaInstrucao *prog, FILE *arq) {
         if(carrega_instrucao(&inst, linha) != 0) continue;
         if(inst.op == 'N') {
             // A instrução N é especial, pois dá informações que são necessárias
-            // para a criação do processo. Por isso, ela é tratada aqui e jamais
-            // entra na lista de instruções
+            // para a criação do processo. Por isso, ela é tratada aqui e não
+            // tem efeito nenhum em tempo de execução
             reg += inst.arg0; // aumenta número de registradores
-            continue;
         }
         liInsereFinal(prog, inst);
     }
