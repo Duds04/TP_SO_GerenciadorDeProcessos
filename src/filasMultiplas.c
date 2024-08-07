@@ -33,14 +33,14 @@ int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades fila
     if (estadoAnterior == EST_PRONTO || estadoAnterior == EST_EXECUTANDO){
 
         if (prioridade < 3){ // Se a prioridade for 3, o processo já está na fila de prioridade máxima
-            if (!enfileirar(&filas->vetorPrioridades[prioridade], idProcesso)) {
+            if (!enfileirar(&filas->vetorPrioridades[prioridade+1], idProcesso)) {
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
                 return 1;
             }
             processo->prioridade+=1;
             return 0;
         }
-        else if(prioridade == 3){
+        else if(prioridade >= 3){
             
             if (!enfileirar(&filas->vetorPrioridades[3], idProcesso)){
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
@@ -56,7 +56,7 @@ int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades fila
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
                 return 1;
             }
-            processo->prioridade--;
+            processo->prioridade-=1;
             return 0;
         }
         else {

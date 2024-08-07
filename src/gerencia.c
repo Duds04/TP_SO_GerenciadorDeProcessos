@@ -15,7 +15,7 @@
 // Laço principal da gerência. Recebe ponta de leitura do pipe e número de
 // CPUs a ser utilizado na simulação
 void gerencia_main(int controle_fd, int num_cpus) {
-    FILE *init = fopen("/entradas/init", "r");
+    FILE *init = fopen("./resources/init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
         return;
@@ -41,26 +41,68 @@ void gerencia_main(int controle_fd, int num_cpus) {
     id[3] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
     id[4] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
 
-    // colocaProcesso(&tabela, &filas, id[0], 0);
+    colocaProcesso(&tabela, &filas, id[0], 0);
     // colocaProcesso(&tabela, &filas, id[1], 0);
     // colocaProcesso(&tabela, &filas, id[2], 0);
     // colocaProcesso(&tabela, &filas, id[3], 0);
+    imprimeFilasMultiplas(&filas);
+    retiraProcesso(&filas);
+
+
+    colocaProcesso(&tabela, &filas, id[0], 0);
+    imprimeFilasMultiplas(&filas);
+    retiraProcesso(&filas);
+
+   
+    for (int i = 0; i < 8; i++)
+    {
+
+        colocaProcesso(&tabela, &filas, id[0], 0);
+        imprimeFilasMultiplas(&filas);
+        retiraProcesso(&filas);
+        
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+
+        colocaProcesso(&tabela, &filas, id[0], 2);
+        imprimeFilasMultiplas(&filas);
+        retiraProcesso(&filas);
+        
+    }
+    
+
+    colocaProcesso(&tabela, &filas, id[0], 2);
+    imprimeFilasMultiplas(&filas);
+    retiraProcesso(&filas);
+    colocaProcesso(&tabela, &filas, id[0], 2);
+    imprimeFilasMultiplas(&filas);
+    retiraProcesso(&filas);
+
+    // colocaProcesso(&tabela, &filas, id[1], 0);
     // imprimeFilasMultiplas(&filas);
     // retiraProcesso(&filas);
 
-    // processo_imprime(tpAcessaProcesso(&tabela, id[0]));
-    filas.vetorPrioridades[0].primeiro->idProcesso = 0;
-    filas.vetorPrioridades[1].primeiro->idProcesso = 1;
-    filas.vetorPrioridades[2].primeiro->idProcesso = 2;
-    filas.vetorPrioridades[3].primeiro->idProcesso = 100;
-    for (int i = 0; i < 8; i++){
-        processo_dados(tpAcessaProcesso(&tabela, id[0]));
-        colocaProcesso(&tabela, &filas, id[3], 0);
-        processo_dados(tpAcessaProcesso(&tabela, id[0]));
-        imprimeFilasMultiplas(&filas);
-        retiraProcesso(&filas);
-    }
-    imprimeFilasMultiplas(&filas);
+    // colocaProcesso(&tabela, &filas, id[2], 0);
+    // imprimeFilasMultiplas(&filas);
+    // retiraProcesso(&filas);
+
+    // colocaProcesso(&tabela, &filas, id[0], 0);
+    // imprimeFilasMultiplas(&filas);
+    // retiraProcesso(&filas);
+
+    // colocaProcesso(&tabela, &filas, id[0], 3);
+    // imprimeFilasMultiplas(&filas);
+    // retiraProcesso(&filas);
+
+    // colocaProcesso(&tabela, &filas, id[0], 3);
+    // imprimeFilasMultiplas(&filas);
+    // retiraProcesso(&filas);
+
+
+
+
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
     bloqueados_inicia(&bloq);
