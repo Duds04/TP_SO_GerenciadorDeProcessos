@@ -13,7 +13,7 @@
 // Laço principal da gerência. Recebe ponta de leitura do pipe e número de
 // CPUs a ser utilizado na simulação
 void gerencia_main(int controle_fd, int num_cpus) {
-    FILE *init = fopen("init", "r");
+    FILE *init = fopen("/entradas/init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
         return;
