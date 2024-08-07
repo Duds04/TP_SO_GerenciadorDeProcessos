@@ -62,12 +62,10 @@ static int instrucaoN(CPU *cpu) {
 static void instrucaoD(int x, CPU *cpu) {
     cpu->reg[x] = 0;
 }
-
 // Atribuição de valor a variável
 static void instrucaoV(int x, int n, CPU *cpu){
     cpu->reg[x] = n;
 }
-
  // Adição de um valor ao valor da variável
 static void instrucaoA(int x, int n, CPU *cpu){
     cpu->reg[x] =  cpu->reg[x] + n;
@@ -88,11 +86,11 @@ static void instrucaoT(CPU *cpu){
 }
 
 // Cria um novo processo
-static void instrucaoF(int n, TTabelaProcesso* tabelaProcessos, int prioridade, CPU *cpu) {
+static void instrucaoF(int n, TTabelaProcesso* tabelaProcessos, int prioridade, CPU *cpu, PfilasPrioridades filas) {
     TListaInstrucao novoCodigo;
     liCopiaProfunda(cpu->codigo, &novoCodigo);
-    tpAdicionaProcesso(tabelaProcessos, cpu->pidProcessoAtual, cpu->pc + n,
-            prioridade, cpu->num_regs, novoCodigo, cpu->tempo);
+    Tprocesso * processo = tpAdicionaProcesso(tabelaProcessos, cpu->pidProcessoAtual, cpu->pc + n, prioridade, cpu->num_regs, novoCodigo, cpu->tempo);
+    colocaProcesso(cpu->pTabela, filas, processo->id, EST_PRONTO); // TODO: conferir se ao criar um novo processo ele realmente deve ser inserido no escalonador 
 }
 
 // Substitui o programa de um processo
@@ -114,15 +112,37 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
 }
 
 
-void executaProximaInstrucao(CPU *cpu, void *Escalonador) {
+void executaProximaInstrucao(CPU *cpu, PfilasPrioridades filas) {
     if(cpu->pidProcessoAtual == -1) {
         fprintf(stderr, "[!] CPU vazia\n");
+        int idProcessoAtual = retiraProcesso(filas);
+        if (idProcessoAtual == -1){ // Não deve ocorrer
+            fprintf(stderr, "> NA CPU: Não há nenhum processo no escalonador e, portanto, nada a ser executado");
+            exit(0);
+        }
+        Tprocesso * processo = tpAcessaProcesso(cpu->pTabela, idProcessoAtual);
+        if (processo == NULL){ // Não deve ocorrer
+            fprintf(stderr, "> EM CPU: não há nenhum processo na tabela de processos");
+        }
+        carregaProcesso(cpu, idProcessoAtual, tamanhoQuantumPrioridade(processo->prioridade)); // carrega o init pra cpu
         exit(1);
     }
     if(cpu->quantum == 0) {
+        colocaProcesso(cpu->pTabela, filas, cpu->pidProcessoAtual, EST_EXECUTANDO );
         fprintf(stderr, "[!] Processo %d excedeu o quantum\n", cpu->pidProcessoAtual);
+        int idProcessoAtual = retiraProcesso(filas);
+        if (idProcessoAtual == -1){
+            fprintf(stderr, "> NA CPU: Não há nenhum processo no escalonador e, portanto, nada a ser executado");
+            exit(0);
+        }
+        Tprocesso * processo = tpAcessaProcesso(cpu->pTabela, idProcessoAtual);
+        if (processo == NULL){
+            fprintf(stderr, "> EM CPU: não há nenhum processo na tabela de processos");
+        }
+        carregaProcesso(cpu, idProcessoAtual, tamanhoQuantumPrioridade(processo->prioridade));
+        // colocaProcesso(&filas, cpu->pTabela, cpu->pidProcessoAtual, EST_EXECUTANDO);
         exit(1);
-        // CHAMAR ESCALONADOR
+        
     }
     if(cpu->pc >= cpu->codigo->ultimo) {
         fprintf(stderr, "[!] Processo %d excedeu o tamanho do programa\n", cpu->pidProcessoAtual);
@@ -153,11 +173,10 @@ void executaProximaInstrucao(CPU *cpu, void *Escalonador) {
             break;
         case 'T':
             instrucaoT(cpu);
-            // CHAMAR ESCALONADOR
             break;
         case 'F':
             prioridade = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual)->prioridade;
-            instrucaoF(instrucao.arg0, cpu->pTabela, prioridade, cpu);
+            instrucaoF(instrucao.arg0, cpu->pTabela, prioridade, cpu, filas);
             break;
         case 'R':
             instrucaoR(instrucao.arq, cpu);
