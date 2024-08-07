@@ -15,10 +15,13 @@ int inicializaTodasFilas(PfilasPrioridades filas){
         inicializaFila(&filas->vetorPrioridades[i]);
         fprintf(stderr, "Fila de prioridade %d inicializada\n", i);
     }
+    return 0;
 }
+
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou execucao) e coloca o processo no escalonador. Retorna 1 se der errado
-int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior){
+int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades filas ,int idProcesso, int estadoAnterior){
     Tprocesso* processo = NULL;
+
     processo = tpAcessaProcesso(tabelaProcesso, idProcesso);
     if (processo == NULL){
         printf("> EM FILAS MULTIPLAS: Processo nao encontrado\n");
@@ -26,9 +29,11 @@ int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades fila
     }
     int prioridade = processo->prioridade;
     // se o estado anterior era pronto, a sua prioridade diminui
+    // imprimeFilasMultiplas(filas);
     if (estadoAnterior == EST_PRONTO || estadoAnterior == EST_EXECUTANDO){
+
         if (prioridade < 3){ // Se a prioridade for 3, o processo já está na fila de prioridade máxima
-            if (!enfileirar(&filas->vetorPrioridades[prioridade+1], idProcesso)) {
+            if (!enfileirar(&filas->vetorPrioridades[prioridade], idProcesso)) {
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
                 return 1;
             }
@@ -36,15 +41,18 @@ int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades fila
             return 0;
         }
         else if(prioridade == 3){
+            
             if (!enfileirar(&filas->vetorPrioridades[3], idProcesso)){
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
                 return 1;
             }
+            
+            return 0;
         }
     } 
     else if (estadoAnterior == EST_BLOQUEADO){
         if (prioridade > 0){ // Se a prioridade for 3, o processo já está na fila de prioridade máxima
-            if (!enfileirar(&filas->vetorPrioridades[prioridade--], idProcesso)) {
+            if (!enfileirar(&filas->vetorPrioridades[prioridade-1], idProcesso)) {
                 printf("> EM FILAS MULTIPLAS: Nao foi possivel enfileirar\n");
                 return 1;
             }
@@ -70,7 +78,8 @@ int retiraProcesso(PfilasPrioridades filas){
     for (int i = 0; i < 4; i++){
         if (estaVazia(&filas->vetorPrioridades[i])) continue; // Avanca para a proxima lista
         else {
-            return desenfileirar(&filas->vetorPrioridades[i]);
+            fprintf(stderr, "Retirando processo da fila de prioridade %d\n", i);
+            return desenfileirar(&filas->vetorPrioridades[i]); 
         }
     }
     return -1;

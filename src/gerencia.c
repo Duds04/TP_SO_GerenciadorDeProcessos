@@ -74,13 +74,20 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // colocaProcesso(&tabela, &filas, id[3], 0);
     // imprimeFilasMultiplas(&filas);
     // retiraProcesso(&filas);
-
-    for (int i = 0; i < 5; i++){
-        colocaProcesso(&tabela, &filas, id[0], 0);
-        // imprimeFilasMultiplas(&filas);
+    
+    // processo_imprime(tpAcessaProcesso(&tabela, id[0]));
+    filas.vetorPrioridades[0].primeiro->idProcesso = 0;
+    filas.vetorPrioridades[1].primeiro->idProcesso = 1;
+    filas.vetorPrioridades[2].primeiro->idProcesso = 2;
+    filas.vetorPrioridades[3].primeiro->idProcesso = 100;
+    for (int i = 0; i < 8; i++){
+        processo_dados(tpAcessaProcesso(&tabela, id[0]));
+        colocaProcesso(&tabela, &filas, id[3], 0);
+        processo_dados(tpAcessaProcesso(&tabela, id[0]));
+        imprimeFilasMultiplas(&filas);
         retiraProcesso(&filas);
     }
-
+    imprimeFilasMultiplas(&filas);
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
     bloqueados_inicia(&bloq);

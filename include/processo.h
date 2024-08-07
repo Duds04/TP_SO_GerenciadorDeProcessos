@@ -22,9 +22,12 @@ typedef struct {
     int tempoInicio;        // unidade de tempo de ínicio
 } Tprocesso;
 
+
 // Inicializa processo
 void processo_inicia(Tprocesso *proc, int id, int id_pai, int pc, int prioridade,
         int num_regs, TListaInstrucao codigo, int tempoInicio);
+
+void processo_dados(const Tprocesso *proc);
 
 // Imprime os dados de um processo
 void processo_imprime(const Tprocesso *proc);
