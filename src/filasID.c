@@ -24,28 +24,33 @@ bool estaVazia(PFilaId fila) {
 // Funcao para enfileirar um novo processo na fila
 bool enfileirar(PFilaId fila, int idProcesso){
     PCelulaFilaId novo = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
-    novo->idProcesso = idProcesso;
-    novo->proxId = NULL;
+
     if (novo == NULL){
         printf("> EM FILAS ID: Erro ao alocar memoria para nova celula\n");
         return false;
     }
+
+    novo->idProcesso = idProcesso;
+    novo->proxId = NULL;
+    
     fila->ultimo->proxId = novo;
     fila->ultimo = novo;
-    printf("Processo %d enfileirado com sucesso!\n", idProcesso);
     return true;
 }
 
 // Funcao para desenfileirar um processo da fila. retorna -1 se a fila estiver vazia
 int desenfileirar(PFilaId fila){
     int idProcesso;
+
     if (estaVazia(fila)){
         printf("> EM FILAS ID: Fila vazia\n");
         return -1;
     }
-    idProcesso = fila->primeiro->idProcesso;
-    PCelulaFilaId aux = fila->primeiro;
-    fila->primeiro = fila->primeiro->proxId;
+
+    PCelulaFilaId aux = fila->primeiro->proxId;
+    idProcesso = aux->idProcesso;
+    fila->primeiro->proxId = aux->proxId;
+
     free(aux);
     return idProcesso;
 }
@@ -76,6 +81,7 @@ void imprimeFila(PFilaId fila){
         printf("> EM FILAS ID: Fila nao inicializada corretamente.\n");
         return;
     }
+    
     aux = fila->primeiro->proxId;
     while (aux != NULL)
     {

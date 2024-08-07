@@ -68,13 +68,18 @@ void gerencia_main(int controle_fd, int num_cpus) {
     id[3] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
     id[4] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
 
-    colocaProcesso(&tabela, &filas, id[0], 0);
-    colocaProcesso(&tabela, &filas, id[1], 0);
-    colocaProcesso(&tabela, &filas, id[2], 0);
-    colocaProcesso(&tabela, &filas, id[3], 0);
-    imprimeFilasMultiplas(&filas);
+    // colocaProcesso(&tabela, &filas, id[0], 0);
+    // colocaProcesso(&tabela, &filas, id[1], 0);
+    // colocaProcesso(&tabela, &filas, id[2], 0);
+    // colocaProcesso(&tabela, &filas, id[3], 0);
+    // imprimeFilasMultiplas(&filas);
+    // retiraProcesso(&filas);
 
-
+    for (int i = 0; i < 5; i++){
+        colocaProcesso(&tabela, &filas, id[0], 0);
+        // imprimeFilasMultiplas(&filas);
+        retiraProcesso(&filas);
+    }
 
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
