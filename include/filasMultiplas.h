@@ -9,7 +9,7 @@
 
 typedef struct {
     int numCPUs;     // Numero de CPUs
-    PFilaId vetorPrioridades[4]; // Vetor de prioridades
+    TFilaId vetorPrioridades[4]; // Vetor de prioridades
 }TfilasPrioridades;
 typedef TfilasPrioridades* PfilasPrioridades;
 
@@ -17,7 +17,7 @@ typedef TfilasPrioridades* PfilasPrioridades;
 int inicializaTodasFilas(PfilasPrioridades filas);
 
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou execucao) e coloca o processo no escalonador. Retorna 1 se der errado
-int colocaProcesso(const* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior);
+int colocaProcesso(const TTabelaProcesso* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior);
 
 // Retorna o id do processo a ser executado na vez atual. Retorna -1 se não houver processo a ser executado
 int retiraProcesso(PfilasPrioridades filas);

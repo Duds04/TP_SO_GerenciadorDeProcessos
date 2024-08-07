@@ -3,10 +3,12 @@
 // Funcao para inicializar a fila
 bool inicializaFila(PFilaId fila) {
     fila->primeiro = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
+
     if (fila->primeiro == NULL){
         printf("> EM FILAS ID: Erro ao alocar memoria para celula cabeca na inicializaçao\n");
         return false;
     }
+
     fila->ultimo = fila->primeiro;
     fila->primeiro->proxId = NULL;
     fila->primeiro->idProcesso = -1;  
@@ -77,9 +79,10 @@ void imprimeFila(PFilaId fila){
     aux = fila->primeiro->proxId;
     while (aux != NULL)
     {
-        printf("%i", aux->idProcesso);
+        fprintf(stderr, "%i ", aux->idProcesso);
         aux = aux->proxId;
     }
+    fprintf(stderr, "\n");
     
 }
 
