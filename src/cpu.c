@@ -10,6 +10,10 @@ void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista, ListaBloqueados* listaBloq
     zeraCPU(cpu);
     cpu->pTabela = pLista;
     cpu->listaBloqueados = listaBloqueados;
+
+    // cpu->filas = malloc(sizeof(TfilasPrioridades));
+    // inicializaFilas(cpu->filas);
+    // printf("CPU inicializada\n");
 }
 
 // Checa se não há nenhum processo carregado
@@ -29,6 +33,7 @@ void zeraCPU(CPU *cpu) {
     cpu->reg = NULL;
     cpu->num_regs = 0;
     cpu->codigo = NULL;
+    // cpu->filas = NULL;
 }
 
 // Carrega um processo na CPU pelo ID, com quantum fixo

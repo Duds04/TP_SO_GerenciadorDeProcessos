@@ -17,7 +17,7 @@ typedef struct {
 typedef TFilaId* PFilaId;
 
 // Inicia fila com null 
-bool inicializarFila(PFilaId fila); // cria a cabeça e seta idProcesso para NULL
+bool inicializaFila(PFilaId fila); // cria a cabeça e seta idProcesso para NULL
 
 // Funcao para verificar se a fila esta vazia ( se o prox da cabça é null)
 bool estaVazia(PFilaId fila);

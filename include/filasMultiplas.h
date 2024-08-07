@@ -14,7 +14,7 @@ typedef struct {
 typedef TfilasPrioridades* PfilasPrioridades;
 
 
-int inicializaFilas(PfilasPrioridades filas);
+int inicializaTodasFilas(PfilasPrioridades filas);
 
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou execucao) e coloca o processo no escalonador. Retorna 1 se der errado
 int colocaProcesso(const* tabelaProcesso, PfilasPrioridades filas ,int  idProcesso, int estadoAnterior);

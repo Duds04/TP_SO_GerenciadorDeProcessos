@@ -7,6 +7,7 @@
 #include "instrucao.h"
 #include "bloqueados.h"
 #include "processo.h"
+#include "filasMultiplas.h"
 
 // Estado atual da CPU
 typedef struct {
@@ -19,6 +20,8 @@ typedef struct {
     int quantum;             // tempo max de execução de um processo (em unidades)
     int *reg, num_regs;      // registradores do processo atual
     TListaInstrucao *codigo; // referência para as instruções do processo atual
+
+    // PfilasPrioridades filas;
 } CPU;
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação

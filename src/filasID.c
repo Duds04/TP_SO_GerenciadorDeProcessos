@@ -1,7 +1,7 @@
 #include "filasID.h"
 
 // Funcao para inicializar a fila
-bool inicializarFila(PFilaId fila) {
+bool inicializaFila(PFilaId fila) {
     fila->primeiro = (PCelulaFilaId) malloc(sizeof(TCelulaFilaId));
     if (fila->primeiro == NULL){
         printf("> EM FILAS ID: Erro ao alocar memoria para celula cabeca na inicializaçao\n");

@@ -42,25 +42,22 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // // sozinha, na função de executar a próxima instrução
     // carregaProcesso(&cpu, id, 5);
 
-    fprintf(stderr, "KSkds");
-
-
-
     FILE *init = fopen("init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
         return;
     }
+    
     // Carrega o processo inicial do arquivo init
     TListaInstrucao programa_init;
     liIniciaLista(&programa_init);
     int num_regs = carrega_executavel(&programa_init, init);
     fclose(init);
-
-    PfilasPrioridades filas;
-    inicializaFilas(filas);
-
-
+    // PCaverna caverna = (PCaverna) malloc(sizeof(TipoCaverna));
+    TfilasPrioridades filas;
+    inicializaTodasFilas(&filas);
+    
+    // fprintf(stderr, "Teste");
     // Inicializa a tabela de processos com o processo inicial apenas
     TTabelaProcesso tabela;
     tpIniciaLista(&tabela);
@@ -71,11 +68,11 @@ void gerencia_main(int controle_fd, int num_cpus) {
     id[3] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
     id[4] = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
 
-    colocaProcesso(&tabela, filas, id[0], 0);
-    colocaProcesso(&tabela, filas, id[1], 0);
-    colocaProcesso(&tabela, filas, id[2], 0);
-    colocaProcesso(&tabela, filas, id[3], 0);
-    imprimeFilasMultiplas(filas);
+    colocaProcesso(&tabela, &filas, id[0], 0);
+    colocaProcesso(&tabela, &filas, id[1], 0);
+    colocaProcesso(&tabela, &filas, id[2], 0);
+    colocaProcesso(&tabela, &filas, id[3], 0);
+    imprimeFilasMultiplas(&filas);
 
 
 
@@ -89,8 +86,7 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // Temporário! A CPU provavelmente deveria carregar o processo inicial
     // sozinha, na função de executar a próxima instrução
     // carregaProcesso(&cpu, id, 5);
-
-
+    
 
     bool ok = true;
     char buf[BUF_MAX];
@@ -103,8 +99,9 @@ void gerencia_main(int controle_fd, int num_cpus) {
                     ok = false;
                     break;
                 case 'U':
+                    fprintf(stderr, "Desbloqueando\n");
                     bloqueados_tique(&bloq);
-                    executaProximaInstrucao(&cpu);
+                    executaProximaInstrucao(&cpu, NULL);
                     break;
             }
         }

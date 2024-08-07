@@ -7,19 +7,33 @@
 
 
 
-int inicializaFilas(PfilasPrioridades filas){
+int inicializaTodasFilas(PfilasPrioridades filas){
+
+    fprintf(stderr, "Inicializando filas multiplas\n");
+    
+    filas = (PfilasPrioridades) malloc(sizeof(TfilasPrioridades));
+
+    if (filas == NULL) { // Verificar se a alocação foi bem-sucedida
+        fprintf(stderr, "Erro ao alocar memória para filas\n");
+        exit(EXIT_FAILURE);
+    }
+
     for (int i = 0; i < 4; i++){
         filas->vetorPrioridades[i] = NULL;
+        filas->vetorPrioridades[i] = malloc(sizeof(TFilaId));
+        inicializaFila(filas->vetorPrioridades[i]);
+        fprintf(stderr, "Fila de prioridade %d inicializada\n", i);
     }
-    for (int i = 0; i < 4; i++){
-        filas->vetorPrioridades[i] = inicializaFilas(filas->vetorPrioridades[i]);
-        if (filas->vetorPrioridades[i] == NULL){
-            for (int j = 0; j < i; j++){
-                filas->vetorPrioridades[j] == NULL;
-            }
-            return 0;
-        }
-    }
+
+    // for (int i = 0; i < 4; i++){
+    //     filas->vetorPrioridades[i] = inicializaFilas(filas->vetorPrioridades[i]);
+    //     if (filas->vetorPrioridades[i] == NULL){
+    //         for (int j = 0; j < i; j++){
+    //             filas->vetorPrioridades[j] == NULL;
+    //         }
+    //         return 0;
+    //     }
+    // }
 }
 
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou execucao) e coloca o processo no escalonador. Retorna 1 se der errado
