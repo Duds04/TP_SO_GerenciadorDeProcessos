@@ -15,39 +15,12 @@
 // Laço principal da gerência. Recebe ponta de leitura do pipe e número de
 // CPUs a ser utilizado na simulação
 void gerencia_main(int controle_fd, int num_cpus) {
-    // FILE *init = fopen("init", "r");
-    // if(init == NULL) {
-    //     fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
-    //     return;
-    // }
-    // // Carrega o processo inicial do arquivo init
-    // TListaInstrucao programa_init;
-    // liIniciaLista(&programa_init);
-    // int num_regs = carrega_executavel(&programa_init, init);
-    // fclose(init);
-
-    // // Inicializa a tabela de processos com o processo inicial apenas
-    // TTabelaProcesso tabela;
-    // tpIniciaLista(&tabela);
-    // int id = tpAdicionaProcesso(&tabela, -1, 0, 0, num_regs, programa_init, 0);
-
-    // // Inicializa a lista de bloqueados
-    // ListaBloqueados bloq;
-    // bloqueados_inicia(&bloq);
-
-    // // Inicializa a CPU
-    // CPU cpu;
-    // inicializaCPU(&cpu, &tabela, &bloq);
-    // // Temporário! A CPU provavelmente deveria carregar o processo inicial
-    // // sozinha, na função de executar a próxima instrução
-    // carregaProcesso(&cpu, id, 5);
-
-    FILE *init = fopen("init", "r");
+    FILE *init = fopen("/entradas/init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
         return;
     }
-    
+
     // Carrega o processo inicial do arquivo init
     TListaInstrucao programa_init;
     liIniciaLista(&programa_init);
@@ -56,7 +29,7 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // PCaverna caverna = (PCaverna) malloc(sizeof(TipoCaverna));
     TfilasPrioridades filas;
     inicializaTodasFilas(&filas);
-    
+
     // fprintf(stderr, "Teste");
     // Inicializa a tabela de processos com o processo inicial apenas
     TTabelaProcesso tabela;
@@ -74,7 +47,7 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // colocaProcesso(&tabela, &filas, id[3], 0);
     // imprimeFilasMultiplas(&filas);
     // retiraProcesso(&filas);
-    
+
     // processo_imprime(tpAcessaProcesso(&tabela, id[0]));
     filas.vetorPrioridades[0].primeiro->idProcesso = 0;
     filas.vetorPrioridades[1].primeiro->idProcesso = 1;
@@ -98,7 +71,7 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // Temporário! A CPU provavelmente deveria carregar o processo inicial
     // sozinha, na função de executar a próxima instrução
     // carregaProcesso(&cpu, id, 5);
-    
+
 
     bool ok = true;
     char buf[BUF_MAX];
