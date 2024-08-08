@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "tabela.h"
-#include "instrucao.h"
 
 void tpIniciaLista(TTabelaProcesso *pLista){
     Tprocesso *listProcess = (Tprocesso *) malloc(TAM_INIT * sizeof(Tprocesso));

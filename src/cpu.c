@@ -147,6 +147,9 @@ void executaProximaInstrucao(CPU *cpu) {
 
     cpu->tempo += 1;
     Instrucao instrucao = cpu->codigo->intrucoes[cpu->pc];
+    printf("Executando instrução ");
+    liImprimeInstrucao(instrucao);
+    printf("\n");
     switch(instrucao.op) {
         case 'N':
             instrucaoN(cpu);
