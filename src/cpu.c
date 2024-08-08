@@ -53,7 +53,6 @@ void carregaProcesso(CPU *cpu, int pidProcessoAtual) {
 }
 
 // Define o número de variáveis declaradas no processo (em tempo de execução,
-// não faz nada de verdade)
 static int instrucaoN(CPU *cpu) {
     return cpu->num_regs;
 }
@@ -142,7 +141,6 @@ void executaProximaInstrucao(CPU *cpu) {
         carregaProcesso(cpu, idProcessoAtual);
     }
     if(cpu->pc >= cpu->codigo->ultimo) {
-        // Se isso acontecer, alguma coisa deu errado
         fprintf(stderr, "[!] Processo %d com PC inválido\n", cpu->pidProcessoAtual);
         exit(1);
     }
