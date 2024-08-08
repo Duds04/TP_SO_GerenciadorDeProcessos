@@ -8,7 +8,7 @@
 #include "processo.h"
 
 // Identificação de cada algoritmo de escalonamento
-typedef enum : int {
+typedef enum {
     ESC_ROBIN = 0,
     ESC_FILAS_MULTIPLAS = 1,
     NUM_ESCALONAMENTOS,
