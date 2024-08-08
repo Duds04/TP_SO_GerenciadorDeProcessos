@@ -11,8 +11,8 @@ void inicializaTodasFilas(PfilasPrioridades filas){
 
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou
 // execucao) e coloca o processo no escalonador. Retorna 1 se der errado
-int enfileiraProcesso(PfilasPrioridades filas, int id, Tprocesso *processo) {
-    int prioridade = processo->prioridade, i;
+int enfileiraProcesso(PfilasPrioridades filas, Tprocesso *processo) {
+    int prioridade = processo->prioridade, id = processo->id, i;
     // se o estado anterior era pronto, a sua prioridade diminui
     // imprimeFilasMultiplas(filas);
     switch(processo->estado) {

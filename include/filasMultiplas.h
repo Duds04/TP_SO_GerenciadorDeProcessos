@@ -17,7 +17,7 @@ void inicializaTodasFilas(PfilasPrioridades filas);
 
 // Recebe o id do processo e o estado anterior do processo (bloqueado ou
 // execucao) e coloca o processo no escalonador. Retorna 1 se der errado
-int enfileiraProcesso(PfilasPrioridades filas, int id, Tprocesso *processo);
+int enfileiraProcesso(PfilasPrioridades filas, Tprocesso *processo);
 
 // Retorna o id do processo a ser executado na vez atual. Retorna -1 se não
 // houver processo a ser executado

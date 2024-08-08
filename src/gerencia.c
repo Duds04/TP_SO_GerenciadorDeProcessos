@@ -13,9 +13,8 @@
 
 void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *listaBloq);
 
-// Laço principal da gerência. Recebe ponta de leitura do pipe e número de
-// CPUs a ser utilizado na simulação
-void gerencia_main(int controle_fd, int num_cpus) {
+// Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
+void gerencia_main(int controle_fd, Config conf) {
     FILE *init = fopen("./resources/init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
@@ -39,11 +38,11 @@ void gerencia_main(int controle_fd, int num_cpus) {
     // Escalonador de filas múltiplas
     TfilasPrioridades filas;
     inicializaTodasFilas(&filas);
-    enfileiraProcesso(&filas, 0, tpAcessaProcesso(&tabela, 0));
+    enfileiraProcesso(&filas, tpAcessaProcesso(&tabela, 0));
 
     // Inicializa a CPU
     CPU cpu;
-    inicializaCPU(&cpu, &tabela, &bloq, &filas);
+    inicializaCPU(&cpu, &tabela, &bloq, &filas, conf.esc);
 
     bool ok = true;
     char buf[BUF_MAX];
@@ -66,7 +65,7 @@ void gerencia_main(int controle_fd, int num_cpus) {
     bloqueados_libera(&bloq);
 }
 
-void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *listaBloq){
+void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *listaBloq) {
     // A primeira coisa que deve ser feita é dar um tique de relógio na filas
     // de bloqueados para atualizar seus estados
     bloqueados_tique(listaBloq);
@@ -77,8 +76,7 @@ void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *li
     int idProcessoDesbloqueado;
     while((idProcessoDesbloqueado = bloqueados_remove0(listaBloq)) >= 0) {
         // O processo é reinserido no escalonador
-        enfileiraProcesso(filas, idProcessoDesbloqueado,
-                tpAcessaProcesso(cpu->pTabela, idProcessoDesbloqueado));
+        enfileiraProcesso(filas, tpAcessaProcesso(cpu->pTabela, idProcessoDesbloqueado));
     }
     // Caso o id do processo seja -1, nenhum processo foi desbloqueado, e portanto
     // nada será feito

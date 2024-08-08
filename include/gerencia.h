@@ -1,8 +1,9 @@
 #ifndef GERENCIA_H
 #define GERENCIA_H
 
-// Laço principal da gerência. Recebe ponta de leitura do pipe e número de
-// CPUs a ser utilizado na simulação
-void gerencia_main(int controle_fd, int num_cpus);
+#include "config.h"
+
+// Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
+void gerencia_main(int controle_fd, Config conf);
 
 #endif // GERENCIA_H

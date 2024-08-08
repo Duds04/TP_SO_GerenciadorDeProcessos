@@ -4,14 +4,16 @@
 
 #include "cpu.h"
 #include "tabela.h"
+#include "escalonamento.h"
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação
 void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista,
-        ListaBloqueados *listaBloqueados, TfilasPrioridades *escalonador) {
+        ListaBloqueados *listaBloqueados, void *escalonador, Escalonamento esc) {
     zeraCPU(cpu);
     cpu->pTabela = pLista;
     cpu->listaBloqueados = listaBloqueados;
     cpu->escalonador = escalonador;
+    cpu->esc = esc;
 }
 
 // Checa se não há nenhum processo carregado
@@ -44,7 +46,7 @@ void carregaProcesso(CPU *cpu, int pidProcessoAtual) {
     processo->estado = EST_EXECUTANDO;
     cpu->pidProcessoAtual = pidProcessoAtual;
     cpu->pc = processo->pc;
-    cpu->quantum = tamanhoQuantumPrioridade(processo->prioridade);
+    cpu->quantum = esc_tamanho_quantum(cpu->esc, processo->prioridade);
     cpu->reg = processo->reg;
     cpu->num_regs = processo->num_regs;
     cpu->codigo = &processo->codigo;
@@ -89,7 +91,7 @@ static void instrucaoF(int n, CPU *cpu) {
     liCopiaProfunda(cpu->codigo, &novoCodigo);
     int id = tpAdicionaProcesso(cpu->pTabela, cpu->pidProcessoAtual, cpu->pc + n,
             cpu->num_regs, novoCodigo, cpu->tempo);
-    enfileiraProcesso(cpu->escalonador, id, tpAcessaProcesso(cpu->pTabela, id));
+    esc_adiciona_processo(cpu->esc, cpu->escalonador, tpAcessaProcesso(cpu->pTabela, id));
 }
 
 // Substitui o programa de um processo
@@ -119,20 +121,20 @@ static void salva_contexto(CPU *cpu) {
         exit(1);
     }
     proc->pc = cpu->pc;
-    enfileiraProcesso(cpu->escalonador, cpu->pidProcessoAtual, proc);
+    esc_adiciona_processo(cpu->esc, cpu->escalonador, proc);
 }
 
 void executaProximaInstrucao(CPU *cpu) {
     if(cpuIsLivre(cpu)) {
         // Se a CPU estiver vazia, carrega um processo do escalonador
-        int idProcessoAtual = retiraProcesso(cpu->escalonador);
+        int idProcessoAtual = esc_retira_processo(cpu->esc, cpu->escalonador);
         if (idProcessoAtual < 0) return; // sem processos
         carregaProcesso(cpu, idProcessoAtual);
     } else if(cpu->quantum == 0) {
         // O quantum do processo atual acabou; novamente, um processo deve ser
         // carregado do escalonador
         salva_contexto(cpu);
-        int idProcessoAtual = retiraProcesso(cpu->escalonador);
+        int idProcessoAtual = esc_retira_processo(cpu->esc, cpu->escalonador);
         if (idProcessoAtual < 0) {
             fprintf(stderr, "[!] Sem processos no escalonador\n");
             exit(0);

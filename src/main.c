@@ -1,26 +1,26 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <unistd.h>
 #include <sys/types.h>
 #include "gerencia.h"
+#include "config.h"
 
 #define MAX 64
+
+// Lê a configuração do programa
+void config_read(Config *conf);
 
 // Remove espaços em branco no começo e no final da string dada, modificando
 // seu conteúdo e retornando um ponteiro para seu novo começo
 char *trim(char *s);
 
 int main(int argc, char *argv[]) {
-    int cpus;
-    printf("Quantas CPUs? ");
-    scanf("%d", &cpus);
-    if(cpus <= 0) {
-        printf("[!] Número de CPUs deve ser positivo\n");
-        return 1;
-    }
-    getchar(); // remove quebra de linha sobressalente
+    Config conf;
+    config_read(&conf);
+
     int chan[2];
     if (pipe(chan) < 0) {
         perror("[!] Falha ao criar pipe");
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     // dados do usuário indiretamente a partir do pipe criado
     if(p == 0) {
         close(chan[1]);
-        gerencia_main(chan[0], cpus);
+        gerencia_main(chan[0], conf);
         close(chan[0]);
         return 0;
     }
@@ -66,11 +66,6 @@ int main(int argc, char *argv[]) {
                 && entrada[1] == '\0') {
             // Comando de simulação lido é válido e deve ser escrito no pipe
             write(chan[1], entrada, 1);
-            // Imediatamente após o processo pai escrever a entrada no terminal, o programa o repassa para o processo filho
-            // ------
-            // ------
-            // ------
-            // Processo filho termina
             if(entrada[0] == 'M') break; // controle encerra aqui
             continue;
         }
@@ -80,6 +75,29 @@ int main(int argc, char *argv[]) {
     if(entrada_arquivo)
         fclose(inp);
     return 0;
+}
+
+// Lê a configuração do programa
+void config_read(Config *conf) {
+    printf("== CONFIGURAÇÃO DE SIMULAÇÃO ==\n");
+    printf("Número de CPUs simuladas: ");
+    scanf("%d", &conf->num_cpus);
+    if(conf->num_cpus <= 0) {
+        fprintf(stderr, "[!] Número de CPUs deve ser positivo\n");
+        exit(1);
+    }
+
+    printf("\nAlgoritmos de escalonamento:\n");
+    printf("%d. Round Robin\n", ESC_ROBIN);
+    printf("%d. Filas múltiplas\n", ESC_FILAS_MULTIPLAS);
+    printf("Selecione a opção desejada entre as acima: ");
+    scanf("%d", &conf->esc);
+    if(conf->esc < 0 || conf->esc >= NUM_ESCALONAMENTOS) {
+        fprintf(stderr, "[!] Algoritmo de escalonamento inválido\n");
+        exit(1);
+    }
+    getchar(); // '\n' sobressalente
+    printf("\n");
 }
 
 // Remove espaços em branco no começo e no final da string dada, modificando

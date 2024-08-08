@@ -6,13 +6,14 @@
 #include "tabela.h"
 #include "instrucao.h"
 #include "bloqueados.h"
-#include "filasMultiplas.h"
+#include "escalonamento.h"
 
 // Estado atual da CPU
 typedef struct {
     TTabelaProcesso *pTabela;         // referência para a tabela de processos
     ListaBloqueados *listaBloqueados; // lista de processos bloqueados
-    TfilasPrioridades *escalonador;   // referência para a estrutura do escalonador
+    void *escalonador;                // referência para a estrutura do escalonador
+    Escalonamento esc;                // identificação do algoritmo de escalonamento
 
     int tempo;               // contador de tempo
     int pidProcessoAtual;    // ID do processo atual (mover na tabela de processos)
@@ -26,7 +27,7 @@ typedef struct {
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação
 void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista,
-        ListaBloqueados *listaBloqueados, TfilasPrioridades *escalonador);
+        ListaBloqueados *listaBloqueados, void *escalonador, Escalonamento esc);
 
 // Carrega um processo na CPU pelo ID, com quantum fixo
 void carregaProcesso(CPU *cpu, int pidProcessoAtual);
@@ -39,6 +40,5 @@ bool cpuIsLivre(const CPU *cpu);
 
 // Deixa a CPU zerada
 void zeraCPU(CPU *cpu);
-
 
 #endif // CPU_H
