@@ -114,7 +114,7 @@ void liLiberaLista(TListaInstrucao *pLista){
 
 // Faz uma cópia profunda da lista de instruções
 void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst) {
-    Instrucao *aux = (Instrucao*) malloc(dst->tamanho * sizeof(Instrucao));
+    Instrucao *aux = (Instrucao*) malloc(src->tamanho * sizeof(Instrucao));
     if(aux == NULL) {
         printf("Erro ao alocar memória!");
         exit(1);

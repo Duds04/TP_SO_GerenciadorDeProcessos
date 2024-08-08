@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "cpu.h"
+#include "instrucao.h"
 #include "tabela.h"
 #include "escalonamento.h"
 
@@ -88,9 +89,10 @@ static void instrucaoT(CPU *cpu){
 static void instrucaoF(int n, CPU *cpu) {
     TListaInstrucao novoCodigo;
     liCopiaProfunda(cpu->codigo, &novoCodigo);
-    int id = tpAdicionaProcesso(cpu->pTabela, cpu->pidProcessoAtual, cpu->pc + n,
+    int id = tpAdicionaProcesso(cpu->pTabela, cpu->pidProcessoAtual, cpu->pc + 1,
             cpu->num_regs, novoCodigo, cpu->tempo);
     esc_adiciona_processo(cpu->esc, cpu->escalonador, tpAcessaProcesso(cpu->pTabela, id));
+    cpu->pc += n;
 }
 
 // Substitui o programa de um processo
@@ -100,10 +102,10 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
         fprintf(stderr, "[!] Falha ao abrir o arquivo %s\n", nome_do_arquivo);
         exit(1);
     }
-
     Tprocesso* processo = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual);
 
     TListaInstrucao novoCodigo;
+    liIniciaLista(&novoCodigo);
     int num_regs = carrega_executavel(&novoCodigo, arquivo);
     fclose(arquivo);
 

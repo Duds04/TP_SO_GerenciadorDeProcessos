@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
     char buf[MAX];
     printf("== CONTROLE DE SIMULAÇÃO ==\n");
     while(1) {
-        if(!entrada_arquivo) printf("> ");
         if(fgets(buf, MAX, inp) == NULL) break;
 
         char *entrada = trim(buf);

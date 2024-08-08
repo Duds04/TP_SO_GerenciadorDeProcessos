@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "tabela.h"
+#include "processo.h"
 
 void tpIniciaLista(TTabelaProcesso *pLista){
     Tprocesso *listProcess = (Tprocesso *) malloc(TAM_INIT * sizeof(Tprocesso));
@@ -73,16 +74,17 @@ Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id) {
 }
 
 void tpImprimeLista(TTabelaProcesso *pLista){
-    printf("Processo na tabela: %d\n", pLista->ultimo);
+    printf("Processos na tabela: %d\n", pLista->ultimo);
     printf("Memória alocada para %d processos\n", pLista->tamanho);
     printf("---------------------------\n");
     for(int i = 0; i < pLista->ultimo; i++)
-        processo_imprime(&pLista->processos[i]);
+        if(pLista->processos[i].estado != EST_FINALIZADO)
+            processo_imprime(&pLista->processos[i]);
 }
 
 void tpLiberaLista(TTabelaProcesso *pLista){
-    for(int i=0; i<pLista->ultimo;i++){
+    for(int i=0; i<pLista->ultimo;i++)
+        if(pLista->processos[i].estado != EST_FINALIZADO)
         processo_libera(&pLista->processos[i]);
-    }
     free(pLista->processos);
 }
