@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "filasID.h"
 #include "filasMultiplas.h"
 #include "processo.h"
 
@@ -69,9 +70,14 @@ int tamanhoQuantumPrioridade(int prioridade){
 }
 
 void imprimeFilasMultiplas(PfilasPrioridades filas){
-    fprintf(stderr, "Filas multiplas: \n");
+    printf("Filas multiplas: \n");
     for (int i = 0; i < 4; i++){
-        fprintf(stderr, "Fila de prioridade %d: \n", i);
+        printf("Fila de prioridade %d: \n", i);
         imprimeFila(&filas->vetorPrioridades[i]);
     }
+}
+
+void liberaListas(PfilasPrioridades filas) {
+    for(int i = 0; i < 4; ++i)
+        liberarFila(&filas->vetorPrioridades[i]);
 }

@@ -32,7 +32,7 @@ bool enfileirar(PFilaId fila, int idProcesso);
 int desenfileirar(PFilaId fila);
 
 // Funcao para liberar a memoria alocada para a fila
-void ApagaFila(PFilaId fila);
+void liberarFila(PFilaId fila);
 
 void imprimeFila(PFilaId fila);
 

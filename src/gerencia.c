@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
 
@@ -8,10 +9,13 @@
 #include "tabela.h"
 #include "cpu.h"
 #include "filasMultiplas.h"
+#include "escalonamento.h"
+#include "robin.h"
 
 #define BUF_MAX 64
 
-void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *listaBloq);
+void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
+        ListaBloqueados *listaBloq);
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
 void gerencia_main(int controle_fd, Config conf) {
@@ -29,20 +33,32 @@ void gerencia_main(int controle_fd, Config conf) {
     // Inicializa a tabela de processos com o processo inicial apenas
     TTabelaProcesso tabela;
     tpIniciaLista(&tabela);
-    tpAdicionaProcesso(&tabela, -1, 0, num_regs, programa_init, 0);
+    int id = tpAdicionaProcesso(&tabela, -1, 0, num_regs, programa_init, 0);
 
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
     bloqueados_inicia(&bloq);
 
-    // Escalonador de filas múltiplas
-    TfilasPrioridades filas;
-    inicializaTodasFilas(&filas);
-    enfileiraProcesso(&filas, tpAcessaProcesso(&tabela, 0));
+    // Inicializa o escalonador apropriado
+    void *escalonador;
+    switch(conf.esc) {
+        case ESC_FILAS_MULTIPLAS:
+            escalonador = malloc(sizeof(TfilasPrioridades));
+            inicializaTodasFilas(escalonador);
+            enfileiraProcesso(escalonador, tpAcessaProcesso(&tabela, id));
+            break;
+        case ESC_ROBIN:
+            escalonador = malloc(sizeof(FilaRobin));
+            robin_inicia(escalonador);
+            robin_adiciona(escalonador, id);
+            break;
+        default:
+            exit(65);
+    }
 
     // Inicializa a CPU
     CPU cpu;
-    inicializaCPU(&cpu, &tabela, &bloq, &filas, conf.esc);
+    inicializaCPU(&cpu, &tabela, &bloq, escalonador, conf.esc);
 
     bool ok = true;
     char buf[BUF_MAX];
@@ -55,7 +71,7 @@ void gerencia_main(int controle_fd, Config conf) {
                     ok = false;
                     break;
                 case 'U':
-                    executaUnidadeTempo(&cpu, &filas, &bloq);
+                    executaUnidadeTempo(conf, &cpu, escalonador, &bloq);
                     break;
             }
         }
@@ -63,9 +79,23 @@ void gerencia_main(int controle_fd, Config conf) {
     zeraCPU(&cpu);
     tpLiberaLista(&tabela);
     bloqueados_libera(&bloq);
+
+    // Desaloca o escalonador apropriado
+    switch(conf.esc) {
+        case ESC_FILAS_MULTIPLAS:
+            liberaListas(escalonador);
+            break;
+        case ESC_ROBIN:
+            robin_libera(escalonador);
+            break;
+        default:
+            break;
+    }
+    free(escalonador);
 }
 
-void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *listaBloq) {
+void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
+        ListaBloqueados *listaBloq) {
     // A primeira coisa que deve ser feita é dar um tique de relógio na filas
     // de bloqueados para atualizar seus estados
     bloqueados_tique(listaBloq);
@@ -76,7 +106,8 @@ void executaUnidadeTempo(CPU * cpu, PfilasPrioridades filas, ListaBloqueados *li
     int idProcessoDesbloqueado;
     while((idProcessoDesbloqueado = bloqueados_remove0(listaBloq)) >= 0) {
         // O processo é reinserido no escalonador
-        enfileiraProcesso(filas, tpAcessaProcesso(cpu->pTabela, idProcessoDesbloqueado));
+        esc_adiciona_processo(conf.esc, escalonador, tpAcessaProcesso(cpu->pTabela,
+                    idProcessoDesbloqueado));
     }
     // Caso o id do processo seja -1, nenhum processo foi desbloqueado, e portanto
     // nada será feito

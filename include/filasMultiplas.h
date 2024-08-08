@@ -29,4 +29,6 @@ int tamanhoQuantumPrioridade(int prioridade);
 
 void imprimeFilasMultiplas(PfilasPrioridades filas);
 
+void liberaListas(PfilasPrioridades filas);
+
 #endif
