@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include <unistd.h>
+#include <signal.h>
+
 #include <sys/types.h>
 #include "gerencia.h"
 #include "config.h"
@@ -13,11 +15,18 @@
 // Lê a configuração do programa
 void config_read(Config *conf);
 
+// essa função é usada no tratamento do sinal gerado quando o filho acaba
+void handle_sigchild(int signum) {
+    // Para o tratamento de sinal é necessário usar essa forma de exit()
+    _exit(0);
+}
+
 // Remove espaços em branco no começo e no final da string dada, modificando
 // seu conteúdo e retornando um ponteiro para seu novo começo
 char *trim(char *s);
 
 int main(int argc, char *argv[]) {
+    signal(SIGCHLD, handle_sigchild);
     Config conf;
     config_read(&conf);
 

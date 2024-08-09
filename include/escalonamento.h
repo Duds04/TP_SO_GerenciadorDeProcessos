@@ -24,4 +24,6 @@ int esc_retira_processo(Escalonamento esc, void *escalonador);
 // de prioridade dado
 int esc_tamanho_quantum(Escalonamento esc, int prioridade);
 
+void esc_imprime_escalonador(Escalonamento esc, void *escalonador);
+
 #endif // ESCALONAMENTO_H

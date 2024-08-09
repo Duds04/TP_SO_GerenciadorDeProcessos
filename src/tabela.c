@@ -13,6 +13,7 @@ void tpIniciaLista(TTabelaProcesso *pLista){
     pLista->processos = listProcess;
     pLista->tamanho = TAM_INIT;
     pLista->ultimo = 0;
+    pLista->contadorProcessos = 0;
 }
 
 static void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista){
@@ -53,6 +54,7 @@ int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
     processo_inicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
             tempoInicio);
     pLista->processos[id] = proc;
+    pLista->contadorProcessos++;
     return id;
 }
 
@@ -65,6 +67,7 @@ void tpFinalizaProcesso(TTabelaProcesso *pLista, int id) {
     }
     processo_libera(&pLista->processos[id]);
     pLista->processos[id].estado = EST_FINALIZADO;
+    pLista->contadorProcessos--;
 }
 
 // Retorna um ponteiro para o processo dado seu ID
@@ -74,7 +77,7 @@ Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id) {
 }
 
 void tpImprimeLista(TTabelaProcesso *pLista){
-    printf("Processos na tabela: %d\n", pLista->ultimo);
+    printf("Processos na tabela: %d\n", pLista->contadorProcessos);
     printf("Memória alocada para %d processos\n", pLista->tamanho);
     printf("---------------------------\n");
     for(int i = 0; i < pLista->ultimo; i++)

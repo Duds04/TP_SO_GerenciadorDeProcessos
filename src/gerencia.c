@@ -17,6 +17,9 @@
 void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
         ListaBloqueados *listaBloq);
 
+void processoImpressao(Config conf, CPU *cpu, void *escalonador,
+        ListaBloqueados *bloq, TTabelaProcesso *tabela);
+
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
 void gerencia_main(int controle_fd, Config conf) {
     FILE *init = fopen("./resources/init", "r");
@@ -73,6 +76,14 @@ void gerencia_main(int controle_fd, Config conf) {
                 case 'U':
                     executaUnidadeTempo(conf, &cpu, escalonador, &bloq);
                     break;
+                case 'I':
+                    processoImpressao(conf, &cpu, escalonador, &bloq, &tabela);
+                    break;
+            }
+            if(tabela.contadorProcessos == 0) {
+                printf("Acabaram os processos em memória, finalizando programa...\n");
+                ok = false;
+                break;
             }
         }
     }
@@ -92,6 +103,7 @@ void gerencia_main(int controle_fd, Config conf) {
             break;
     }
     free(escalonador);
+    close(controle_fd);
 }
 
 void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
@@ -111,6 +123,26 @@ void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
     }
     // Caso o id do processo seja -1, nenhum processo foi desbloqueado, e portanto
     // nada será feito
+    
+    // Vamos verificar se há processos para ser executado
+    
+
     // Com o processo devidamente carregado, vamos executar a instrução
     executaProximaInstrucao(cpu);
+}
+
+void processoImpressao(Config conf, CPU *cpu, void *escalonador, ListaBloqueados *bloq, TTabelaProcesso *tabela){
+    printf("\t\tImprimindo dados da CPU:\n");
+    imprimeCPU(cpu);
+    
+    printf("\t\tImprimindo dados do escalonador:\n");
+    esc_imprime_escalonador(conf.esc, escalonador);
+
+    printf("\t\tImprimindo dados da tabela de processos:\n");
+    tpImprimeLista(tabela);
+
+    printf("\t\tImprimindo dados da lista de bloqueados:\n");
+    bloqueados_imprime(bloq);
+
+
 }

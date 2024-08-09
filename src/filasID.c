@@ -67,7 +67,7 @@ void liberarFila(PFilaId fila){
     if (!estaVazia(fila)){
         PCelulaFilaId aux = fila->primeiro->proxId;
         PCelulaFilaId auxFree = NULL;
-        printf("> EM FILAS ID: Liberando memoria alocada para fila\n");
+        
         while (aux != NULL)
         {
             auxFree = aux;
@@ -78,7 +78,7 @@ void liberarFila(PFilaId fila){
     }
     free(fila->primeiro);
     fila = NULL;
-    printf("> EM FILAS ID: Fila liberada com sucesso\n");
+    
     return;
 }
 

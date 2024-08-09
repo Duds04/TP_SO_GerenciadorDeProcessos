@@ -187,3 +187,11 @@ void executaProximaInstrucao(CPU *cpu) {
     cpu->pc += 1;
     cpu->quantum -= 1; // a cada instrução executada decrementa o quantum
 }
+
+void imprimeCPU(const CPU *cpu){
+    printf("\tCPU\n------------------\n");
+    printf("TEMPO: %d QUANTUM %d\n------------------\n", cpu->tempo, cpu->quantum);
+    printf("ID DO PROCESSO ATUAL: %d  PC DO PROCESSO ATUAL: %d\n", cpu->pidProcessoAtual, cpu->pc);
+    printf("\nDADOS DO PROCESSO NA CPU\n");
+    processo_imprime(&cpu->pTabela->processos[cpu->pidProcessoAtual]);
+}

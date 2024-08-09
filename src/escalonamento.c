@@ -46,3 +46,15 @@ int esc_tamanho_quantum(Escalonamento esc, int prioridade) {
             return 1;
     }
 }
+
+void esc_imprime_escalonador(Escalonamento esc, void *escalonador){
+    switch(esc) {
+        case ESC_FILAS_MULTIPLAS:
+            return imprimeFilasMultiplas(escalonador);
+        case ESC_ROBIN:
+            return robin_imprime(escalonador);
+        default:
+            fprintf(stderr, "[!] Escalonamento %d não reconhecido\n", esc);
+            return 1;
+    }
+}
