@@ -33,7 +33,7 @@ void inicializaCPU(CPU *cpu, TTabelaProcesso *pLista,
 void carregaProcesso(CPU *cpu, int pidProcessoAtual);
 
 // Executa a próxima instrução do processo atual
-void executaProximaInstrucao(CPU *cpu);
+int executaProximaInstrucao(CPU *cpu);
 
 // Checa se não há nenhum processo carregado
 bool cpuIsLivre(const CPU *cpu);
@@ -41,7 +41,5 @@ bool cpuIsLivre(const CPU *cpu);
 // Deixa a CPU zerada
 void zeraCPU(CPU *cpu);
 
-// Imprime estado atual da CPU
-void imprimeCPU(const CPU *cpu);
-
+void imprimeCPU(const CPU *cpu, int numeroCPU);
 #endif // CPU_H

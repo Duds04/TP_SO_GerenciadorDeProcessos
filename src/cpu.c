@@ -125,11 +125,11 @@ static void salva_contexto(CPU *cpu) {
     esc_adiciona_processo(cpu->esc, cpu->escalonador, proc);
 }
 
-void executaProximaInstrucao(CPU *cpu) {
+int executaProximaInstrucao(CPU *cpu) {
     if(cpuIsLivre(cpu)) {
         // Se a CPU estiver vazia, carrega um processo do escalonador
         int idProcessoAtual = esc_retira_processo(cpu->esc, cpu->escalonador);
-        if (idProcessoAtual < 0) return; // sem processos
+        if (idProcessoAtual < 0) return 1; // sem processos
         carregaProcesso(cpu, idProcessoAtual);
     } else if(cpu->quantum == 0) {
         // O quantum do processo atual acabou; novamente, um processo deve ser
@@ -182,16 +182,18 @@ void executaProximaInstrucao(CPU *cpu) {
             break;
         default:
             fprintf(stderr, "[!] Instrução inválida\n");
+        
     }
 
     cpu->pc += 1;
     cpu->quantum -= 1; // a cada instrução executada decrementa o quantum
+    return 0;
 }
 
-void imprimeCPU(const CPU *cpu){
-    printf("\tCPU\n------------------\n");
-    printf("TEMPO: %d QUANTUM %d\n------------------\n", cpu->tempo, cpu->quantum);
-    printf("ID DO PROCESSO ATUAL: %d  PC DO PROCESSO ATUAL: %d\n", cpu->pidProcessoAtual, cpu->pc);
-    printf("\nDADOS DO PROCESSO NA CPU\n");
+void imprimeCPU(const CPU *cpu, int numeroCPU){
+    printf("TEMPO: %d\nQUANTUM: %d\n", cpu->tempo, cpu->quantum);
+    printf("ID DO PROCESSO ATUAL: %d\nPC DO PROCESSO ATUAL: %d\n------------------\n", cpu->pidProcessoAtual, cpu->pc);
+    printf("\nDADOS DO PROCESSO NA CPU #%d\n------------------\n", numeroCPU+1);
     processo_imprime(&cpu->pTabela->processos[cpu->pidProcessoAtual]);
+    printf("------------------\n\n");
 }

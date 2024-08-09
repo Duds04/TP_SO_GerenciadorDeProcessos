@@ -21,7 +21,7 @@ void executaProximaInstrucaoMulti(MultiCPUs *cpu);
 
 void liberaMultiCPUs(MultiCPUs* multiCPUs);
 
-void imprimeMultiCPUs(MultiCPUs* multiCPUs);
+void imprimeMultiCPUs(const MultiCPUs* cpus);
 
 #endif // MULTIPLASCPUS_H
 

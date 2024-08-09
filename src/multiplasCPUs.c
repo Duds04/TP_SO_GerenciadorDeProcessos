@@ -14,8 +14,12 @@ void iniciaMultiCPUs(MultiCPUs* multiCPUs, int numCPUs, TTabelaProcesso *tabela,
 }
 
 void executaProximaInstrucaoMulti(MultiCPUs *cpu) {
-    for (int i = 0; i < cpu->numCPUs; i++)
-        executaProximaInstrucao(&cpu->cpus[i]);
+    for (int i = 0; i < cpu->numCPUs; i++){
+        fprintf(stderr, "CPU #%d ", i+1);
+        if(executaProximaInstrucao(&cpu->cpus[i])){
+            printf("Ociosa\n");
+        }
+    }
 }
 
 void liberaMultiCPUs(MultiCPUs* multiCPUs){
@@ -23,8 +27,11 @@ void liberaMultiCPUs(MultiCPUs* multiCPUs){
     multiCPUs->numCPUs = 0;
 }
 
-void imprimeMultiCPUs(MultiCPUs* multiCPUs){
-    for (int i = 0; i < multiCPUs->numCPUs; i++) {
-        imprimeCPU(&multiCPUs->cpus[i]);
+void imprimeMultiCPUs(const MultiCPUs* cpus){
+    for(int i = 0; i < cpus->numCPUs; ++i) {
+        if(cpus->cpus[i].pidProcessoAtual < 0) continue;
+        printf("\tCPU #%d:\n------------------\n", i + 1);
+        imprimeCPU(&cpus->cpus[i], i);
+        
     }
 }

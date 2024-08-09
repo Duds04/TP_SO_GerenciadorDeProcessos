@@ -126,11 +126,9 @@ void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
 
 void processoImpressao(Config conf, MultiCPUs *cpus, void *escalonador, ListaBloqueados *bloq,
         TTabelaProcesso *tabela) {
-    for(int i = 0; i < cpus->numCPUs; ++i) {
-        if(cpus->cpus[i].pidProcessoAtual < 0) continue;
-        printf("\t\tImprimindo dados da CPU #%d:\n", i + 1);
-        imprimeCPU(&cpus->cpus[i]);
-    }
+
+    printf("\t\tImprimindo dados da(s) CPU(s):\n");
+    imprimeMultiCPUs(cpus);
 
     printf("\t\tImprimindo dados do escalonador:\n");
     esc_imprime_escalonador(conf.esc, escalonador);
