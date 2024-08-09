@@ -15,9 +15,11 @@
 // Lê a configuração do programa
 void config_read(Config *conf);
 
-// essa função é usada no tratamento do sinal gerado quando o filho acaba
-void handle_sigchild(int signum) {
-    // Para o tratamento de sinal é necessário usar essa forma de exit()
+// Essa função é usada no tratamento do sinal gerado quando o filho acaba
+void termina_controle(int _) {
+    // Para o tratamento de sinal é necessário usar essa forma de exit(), pois
+    // a versão padrão não é async-signal-safe. Para mais informações, veja
+    // a página de manual signal-safety(7)
     _exit(0);
 }
 
@@ -26,7 +28,11 @@ void handle_sigchild(int signum) {
 char *trim(char *s);
 
 int main(int argc, char *argv[]) {
-    signal(SIGCHLD, handle_sigchild);
+    // Registra o tratador de sinal para garantir que o processo de controle
+    // terminará assim que o de gerência o fizer. NOTA: a função signal não é
+    // lá muito portável, mas, para o nosso caso, ela serve perfeitamente
+    signal(SIGCHLD, termina_controle);
+
     Config conf;
     config_read(&conf);
 

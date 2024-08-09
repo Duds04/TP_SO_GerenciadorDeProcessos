@@ -22,9 +22,9 @@ void processoImpressao(Config conf, MultiCPUs* cpus, void *escalonador,
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
 void gerencia_main(int controle_fd, Config conf) {
-    FILE *init = fopen("./resources/init", "r");
+    FILE *init = fopen("./init", "r");
     if(init == NULL) {
-        fprintf(stderr, "[!] Arquivo init não pode ser aberto\n");
+        fprintf(stderr, "[!] Arquivo init não pôde ser aberto\n");
         return;
     }
     // Carrega o processo inicial do arquivo init

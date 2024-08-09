@@ -42,4 +42,5 @@ bool cpuIsLivre(const CPU *cpu);
 void zeraCPU(CPU *cpu);
 
 void imprimeCPU(const CPU *cpu, int numeroCPU);
+
 #endif // CPU_H
