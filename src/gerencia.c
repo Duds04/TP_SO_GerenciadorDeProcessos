@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+
 #include "bloqueados.h"
 #include "gerencia.h"
 #include "instrucao.h"
@@ -22,6 +26,12 @@ void processoImpressao(Config conf, MultiCPUs* cpus, void *escalonador,
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
 void gerencia_main(int controle_fd, Config conf) {
+
+    // No processo de controle o tratador do sinal encerra o processo porem 
+    // aqui no processo de grrencia queremos que o tratamento volte ao normal
+    // (o filho herda tudo do pai inclusive o tratador)
+    signal(SIGCHLD, SIG_DFL);
+    
     FILE *init = fopen("./init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pôde ser aberto\n");
@@ -63,6 +73,7 @@ void gerencia_main(int controle_fd, Config conf) {
     MultiCPUs cpus;
     iniciaMultiCPUs(&cpus, conf.num_cpus, &tabela, &bloq, escalonador, conf.esc);
 
+    pid_t pi;
     bool ok = true;
     char buf[BUF_MAX];
     while(ok) {
@@ -77,7 +88,25 @@ void gerencia_main(int controle_fd, Config conf) {
                     executaUnidadeTempo(conf, &cpus, escalonador, &bloq, &tabela);
                     break;
                 case 'I':
-                    processoImpressao(conf, &cpus, escalonador, &bloq, &tabela);
+                    pi = fork();
+                    if(pi < 0) {
+                        perror("[!] Falha ao criar o processo de impressão");
+                        return;
+                    }
+                    // Processo filho é responsável pela impressão dos dados, quando ele termina ele morre
+                    else if(pi == 0) {
+                        processoImpressao(conf, &cpus, escalonador, &bloq, &tabela);    
+                        exit(0);
+                    }
+                    // Processo pai espera o filho acabar para continuar
+                    else{
+                        int status, w;
+                        w = wait(&status);
+                        if(w == -1){
+                            perror("[!] Falha ao esperar o processo de impressão [não existente]");
+                        }
+                    }
+                    
                     break;
             }
             if(tabela.contadorProcessos == 0) {
