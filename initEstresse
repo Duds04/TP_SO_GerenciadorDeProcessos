@@ -1,0 +1,14 @@
+N 2
+D 0
+D 1
+F 1
+R initEstresse
+V 0 1000
+V 1 500
+F 1
+R initEstresse
+A 0 19
+A 0 20
+S 1 53
+A 1 55
+T
