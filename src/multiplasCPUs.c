@@ -23,3 +23,8 @@ void liberaMultiCPUs(MultiCPUs* multiCPUs){
     multiCPUs->numCPUs = 0;
 }
 
+void imprimeMultiCPUs(MultiCPUs* multiCPUs){
+    for (int i = 0; i < multiCPUs->numCPUs; i++) {
+        imprimeCPU(&multiCPUs->cpus[i]);
+    }
+}

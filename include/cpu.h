@@ -41,5 +41,7 @@ bool cpuIsLivre(const CPU *cpu);
 // Deixa a CPU zerada
 void zeraCPU(CPU *cpu);
 
+// Imprime estado atual da CPU
 void imprimeCPU(const CPU *cpu);
+
 #endif // CPU_H
