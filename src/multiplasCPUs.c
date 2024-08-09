@@ -1,22 +1,25 @@
+#include <stdlib.h>
+
+#include "cpu.h"
 #include "multiplasCPUs.h"
 
 
-void iniciaMultiCPUs(MultiCPUs* multiCPUs, int numCPUs) {
+void iniciaMultiCPUs(MultiCPUs* multiCPUs, int numCPUs, TTabelaProcesso *tabela,
+        ListaBloqueados *bloq, void *escalonador, Escalonamento esc) {
     multiCPUs->numCPUs = numCPUs;
     multiCPUs->cpus = (CPU*) malloc(numCPUs * sizeof(CPU));
     for (int i = 0; i < numCPUs; i++) {
-        zeraCPU(&multiCPUs->cpus[i]);
+        inicializaCPU(&multiCPUs->cpus[i], tabela, bloq, escalonador, esc);
     }
 }
 
-void executaProximaInstrucao(MultiCPUs *cpu, void *Escalonador){
-    for (int i = 0; i < cpu->numCPUs; i++) {
-        executaProximaInstrucao(&cpu->cpus[i], Escalonador);
-    }
+void executaProximaInstrucaoMulti(MultiCPUs *cpu) {
+    for (int i = 0; i < cpu->numCPUs; i++)
+        executaProximaInstrucao(&cpu->cpus[i]);
 }
 
 void liberaMultiCPUs(MultiCPUs* multiCPUs){
-    multiCPUs->cpus = NULL;
+    free(multiCPUs->cpus);
     multiCPUs->numCPUs = 0;
 }
 

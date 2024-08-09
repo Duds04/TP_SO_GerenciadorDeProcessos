@@ -55,6 +55,5 @@ void esc_imprime_escalonador(Escalonamento esc, void *escalonador){
             return robin_imprime(escalonador);
         default:
             fprintf(stderr, "[!] Escalonamento %d não reconhecido\n", esc);
-            return 1;
     }
 }

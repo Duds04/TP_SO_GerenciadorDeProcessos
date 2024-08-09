@@ -4,8 +4,7 @@
 
 #include "robin.h"
 
-// Macro
-// BitWise, substitui mod (dado que capacidade é potencia de 2) 
+// BitWise, substitui mod (dado que capacidade é potencia de 2)
 #define INC_MOD(i, cap) (((i) + 1) & ((cap) - 1))
 
 void robin_inicia(FilaRobin *r) {
@@ -15,7 +14,7 @@ void robin_inicia(FilaRobin *r) {
         exit(64);
     }
     r->primeiro = 0;
-    r->ultimo = 0; 
+    r->ultimo = 0;
     r->capacidade = CAP_INICIAL;
 }
 
@@ -32,24 +31,21 @@ static void robin_aumenta(FilaRobin *r) {
         fprintf(stderr, "[!] Realocação robin falhada\n");
         exit(64);
     }
-    
+
     for(int i = r->primeiro; i != r->ultimo; i = INC_MOD(i, r->capacidade)){
         aux[count] = r->id_processos[i];
         count++;
     }
     free(r->id_processos);
     r->id_processos = aux;
-    
+
     r->capacidade *= 2;
     r->primeiro = 0;
     r->ultimo = count;
 }
 
 int robin_retira(FilaRobin *r) {
-    if(robin_vazio(r)) {
-        fprintf(stderr, "[?] Tentativa de retirar de uma fila robin vazia\n");
-        return -1;
-    }
+    if(robin_vazio(r)) return -1;
     int escolhido = r->id_processos[r->primeiro];
     r->primeiro = INC_MOD(r->primeiro, r->capacidade);
     return escolhido;
@@ -60,7 +56,7 @@ static bool robin_cheio(const FilaRobin *r) {
 }
 
 void robin_adiciona(FilaRobin *r, int id_processo) {
-    // verifica se está cheio 
+    // verifica se está cheio
     if(robin_cheio(r))
         robin_aumenta(r);
     r->id_processos[r->ultimo] = id_processo;

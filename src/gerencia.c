@@ -7,17 +7,17 @@
 #include "gerencia.h"
 #include "instrucao.h"
 #include "tabela.h"
-#include "cpu.h"
+#include "multiplasCPUs.h"
 #include "filasMultiplas.h"
 #include "escalonamento.h"
 #include "robin.h"
 
 #define BUF_MAX 64
 
-void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
-        ListaBloqueados *listaBloq);
+void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
+        ListaBloqueados *listaBloq, TTabelaProcesso *tabela);
 
-void processoImpressao(Config conf, CPU *cpu, void *escalonador,
+void processoImpressao(Config conf, MultiCPUs* cpus, void *escalonador,
         ListaBloqueados *bloq, TTabelaProcesso *tabela);
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
@@ -59,9 +59,9 @@ void gerencia_main(int controle_fd, Config conf) {
             exit(65);
     }
 
-    // Inicializa a CPU
-    CPU cpu;
-    inicializaCPU(&cpu, &tabela, &bloq, escalonador, conf.esc);
+    // Inicializa as CPUs (número dado na config)
+    MultiCPUs cpus;
+    iniciaMultiCPUs(&cpus, conf.num_cpus, &tabela, &bloq, escalonador, conf.esc);
 
     bool ok = true;
     char buf[BUF_MAX];
@@ -74,10 +74,10 @@ void gerencia_main(int controle_fd, Config conf) {
                     ok = false;
                     break;
                 case 'U':
-                    executaUnidadeTempo(conf, &cpu, escalonador, &bloq);
+                    executaUnidadeTempo(conf, &cpus, escalonador, &bloq, &tabela);
                     break;
                 case 'I':
-                    processoImpressao(conf, &cpu, escalonador, &bloq, &tabela);
+                    processoImpressao(conf, &cpus, escalonador, &bloq, &tabela);
                     break;
             }
             if(tabela.contadorProcessos == 0) {
@@ -87,7 +87,7 @@ void gerencia_main(int controle_fd, Config conf) {
             }
         }
     }
-    zeraCPU(&cpu);
+    liberaMultiCPUs(&cpus);
     tpLiberaLista(&tabela);
     bloqueados_libera(&bloq);
 
@@ -106,8 +106,8 @@ void gerencia_main(int controle_fd, Config conf) {
     close(controle_fd);
 }
 
-void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
-        ListaBloqueados *listaBloq) {
+void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
+        ListaBloqueados *listaBloq, TTabelaProcesso *tabela) {
     // A primeira coisa que deve ser feita é dar um tique de relógio na filas
     // de bloqueados para atualizar seus estados
     bloqueados_tique(listaBloq);
@@ -118,23 +118,20 @@ void executaUnidadeTempo(Config conf, CPU * cpu, void *escalonador,
     int idProcessoDesbloqueado;
     while((idProcessoDesbloqueado = bloqueados_remove0(listaBloq)) >= 0) {
         // O processo é reinserido no escalonador
-        esc_adiciona_processo(conf.esc, escalonador, tpAcessaProcesso(cpu->pTabela,
+        esc_adiciona_processo(conf.esc, escalonador, tpAcessaProcesso(tabela,
                     idProcessoDesbloqueado));
     }
-    // Caso o id do processo seja -1, nenhum processo foi desbloqueado, e portanto
-    // nada será feito
-    
-    // Vamos verificar se há processos para ser executado
-    
-
-    // Com o processo devidamente carregado, vamos executar a instrução
-    executaProximaInstrucao(cpu);
+    executaProximaInstrucaoMulti(cpus);
 }
 
-void processoImpressao(Config conf, CPU *cpu, void *escalonador, ListaBloqueados *bloq, TTabelaProcesso *tabela){
-    printf("\t\tImprimindo dados da CPU:\n");
-    imprimeCPU(cpu);
-    
+void processoImpressao(Config conf, MultiCPUs *cpus, void *escalonador, ListaBloqueados *bloq,
+        TTabelaProcesso *tabela) {
+    for(int i = 0; i < cpus->numCPUs; ++i) {
+        if(cpus->cpus[i].pidProcessoAtual < 0) continue;
+        printf("\t\tImprimindo dados da CPU #%d:\n", i + 1);
+        imprimeCPU(&cpus->cpus[i]);
+    }
+
     printf("\t\tImprimindo dados do escalonador:\n");
     esc_imprime_escalonador(conf.esc, escalonador);
 
@@ -143,6 +140,4 @@ void processoImpressao(Config conf, CPU *cpu, void *escalonador, ListaBloqueados
 
     printf("\t\tImprimindo dados da lista de bloqueados:\n");
     bloqueados_imprime(bloq);
-
-
 }
