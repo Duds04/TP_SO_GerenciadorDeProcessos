@@ -14,6 +14,7 @@ void tpIniciaLista(TTabelaProcesso *pLista){
     pLista->tamanho = TAM_INIT;
     pLista->ultimo = 0;
     pLista->contadorProcessos = 0;
+    pLista->contadorTodosProcessos = 0;
 }
 
 static void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista){
@@ -55,6 +56,7 @@ int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
             tempoInicio);
     pLista->processos[id] = proc;
     pLista->contadorProcessos++;
+    pLista->contadorTodosProcessos++;
     return id;
 }
 

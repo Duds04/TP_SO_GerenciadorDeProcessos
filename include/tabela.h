@@ -8,7 +8,8 @@ typedef struct TTabelaProcesso {
     Tprocesso *processos;
     int ultimo;
     int tamanho;
-    int contadorProcessos;
+    int contadorProcessos; // conta os processos atuais em memória
+    int contadorTodosProcessos; // conta quantos processos passaram pela CPU
 } TTabelaProcesso;
 
 void tpIniciaLista(TTabelaProcesso *pLista);

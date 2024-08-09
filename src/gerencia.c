@@ -81,6 +81,7 @@ void gerencia_main(int controle_fd, Config conf) {
         for(int i = 0; i < n; ++i) {
             switch(buf[i]) {
                 case 'M':
+                    printf("Tempo médio de resposta: %g\n", (cpus.cpus[0].tempo/ (double) tabela.contadorTodosProcessos));
                     printf("Saindo...\n");
                     ok = false;
                     break;
@@ -110,6 +111,7 @@ void gerencia_main(int controle_fd, Config conf) {
                     break;
             }
             if(tabela.contadorProcessos == 0) {
+                printf("Tempo médio de resposta: %g\n", (cpus.cpus[0].tempo/ (double) tabela.contadorTodosProcessos));
                 printf("Acabaram os processos em memória, finalizando programa...\n");
                 ok = false;
                 break;
