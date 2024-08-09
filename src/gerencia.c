@@ -158,15 +158,15 @@ void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
 void processoImpressao(Config conf, MultiCPUs *cpus, void *escalonador, ListaBloqueados *bloq,
         TTabelaProcesso *tabela) {
 
-    printf("\t\tImprimindo dados da(s) CPU(s):\n");
+    printf("\n\tIMPRIMINDO DADOS DA(S) CPU(S):\n");
     imprimeMultiCPUs(cpus);
 
-    printf("\t\tImprimindo dados do escalonador:\n");
+    printf("\n\tIMPRIMINDO DADOS DO ESCALONADOR: \n");
     esc_imprime_escalonador(conf.esc, escalonador);
 
-    printf("\t\tImprimindo dados da tabela de processos:\n");
+    printf("\n\tIMPRIMINDO DADOS DA TABELA DE PROCESSOS: \n");
     tpImprimeLista(tabela);
 
-    printf("\t\tImprimindo dados da lista de bloqueados:\n");
+    printf("\n\tIMPRIMINDO DADOS DA LISTA DE BLOQUEADOS:\n");
     bloqueados_imprime(bloq);
 }

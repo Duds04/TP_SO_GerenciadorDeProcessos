@@ -81,10 +81,13 @@ Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id) {
 void tpImprimeLista(TTabelaProcesso *pLista){
     printf("Processos na tabela: %d\n", pLista->contadorProcessos);
     printf("Memória alocada para %d processos\n", pLista->tamanho);
-    printf("---------------------------\n");
+    printf("====================================\n");
     for(int i = 0; i < pLista->ultimo; i++)
-        if(pLista->processos[i].estado != EST_FINALIZADO)
+        if(pLista->processos[i].estado != EST_FINALIZADO){
             processo_imprime(&pLista->processos[i]);
+            printf("====================================\n");
+        }
+
 }
 
 void tpLiberaLista(TTabelaProcesso *pLista){
