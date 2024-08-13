@@ -117,7 +117,6 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
 static void salva_contexto(CPU *cpu) {
     Tprocesso *proc = tpAcessaProcesso(cpu->pTabela, cpu->pidProcessoAtual);
     if(proc == NULL) {
-        // Não deveria acontecer, mas caso aconteça
         fprintf(stderr, "[!] Processo %d não encontrado\n", cpu->pidProcessoAtual);
         exit(1);
     }
