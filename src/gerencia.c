@@ -11,67 +11,67 @@
 #include "gerencia.h"
 #include "instrucao.h"
 #include "tabela.h"
-#include "multiplasCPUs.h"
+#include "computador.h"
 #include "filasMultiplas.h"
 #include "escalonamento.h"
-#include "robin.h"
+#include "fila.h"
 
 #define BUF_MAX 64
 
-void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
-        ListaBloqueados *listaBloq, TTabelaProcesso *tabela);
+void executaUnidadeTempo(Config conf, Computador *c, void *escalonador,
+        ListaBloqueados *listaBloq, TabelaProcessos *tabela);
 
-void processoImpressao(Config conf, MultiCPUs* cpus, void *escalonador,
-        ListaBloqueados *bloq, TTabelaProcesso *tabela);
+void processoImpressao(Config conf, Computador *c, void *escalonador,
+        ListaBloqueados *bloq, TabelaProcessos *tabela);
 
 // Laço principal da gerência. Recebe ponta de leitura do pipe e configuração
-void gerencia_main(int controle_fd, Config conf) {
+void gerencia(int controle_fd, Config conf) {
 
-    // No processo de controle o tratador do sinal encerra o processo porem 
+    // No processo de controle o tratador do sinal encerra o processo porem
     // aqui no processo de grrencia queremos que o tratamento volte ao normal
     // (o filho herda tudo do pai inclusive o tratador)
     signal(SIGCHLD, SIG_DFL);
-    
+
     FILE *init = fopen("./init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pôde ser aberto\n");
         return;
     }
     // Carrega o processo inicial do arquivo init
-    TListaInstrucao programa_init;
-    liIniciaLista(&programa_init);
-    int num_regs = carrega_executavel(&programa_init, init);
+    Programa programaInit;
+    programaInicia(&programaInit);
+    int numRegs = programaCarrega(&programaInit, init);
     fclose(init);
 
     // Inicializa a tabela de processos com o processo inicial apenas
-    TTabelaProcesso tabela;
-    tpIniciaLista(&tabela);
-    int id = tpAdicionaProcesso(&tabela, -1, 0, num_regs, programa_init, 0);
+    TabelaProcessos tabela;
+    tabelaProcessosInicia(&tabela);
+    int id = tabelaProcessosAdiciona(&tabela, -1, 0, numRegs, programaInit, 0);
 
     // Inicializa a lista de bloqueados
     ListaBloqueados bloq;
-    bloqueados_inicia(&bloq);
+    bloqueadosInicia(&bloq);
 
     // Inicializa o escalonador apropriado
     void *escalonador;
     switch(conf.esc) {
         case ESC_FILAS_MULTIPLAS:
-            escalonador = malloc(sizeof(TfilasPrioridades));
-            inicializaTodasFilas(escalonador);
-            enfileiraProcesso(escalonador, tpAcessaProcesso(&tabela, id));
+            escalonador = malloc(sizeof(FilasMultiplas));
+            filasMultiplasInicia(escalonador);
+            filasMultiplasAdiciona(escalonador, tabelaProcessosAcessa(&tabela, id));
             break;
         case ESC_ROBIN:
-            escalonador = malloc(sizeof(FilaRobin));
-            robin_inicia(escalonador);
-            robin_adiciona(escalonador, id);
+            escalonador = malloc(sizeof(FilaID));
+            filaInicia(escalonador);
+            filaAdiciona(escalonador, id);
             break;
         default:
             exit(65);
     }
 
     // Inicializa as CPUs (número dado na config)
-    MultiCPUs cpus;
-    iniciaMultiCPUs(&cpus, conf.num_cpus, &tabela, &bloq, escalonador, conf.esc);
+    Computador cpus;
+    computadorInicia(&cpus, conf.num_cpus, &tabela, &bloq, escalonador, conf.esc);
 
     pid_t pi;
     bool ok = true;
@@ -96,7 +96,7 @@ void gerencia_main(int controle_fd, Config conf) {
                     }
                     // Processo filho é responsável pela impressão dos dados, quando ele termina ele morre
                     else if(pi == 0) {
-                        processoImpressao(conf, &cpus, escalonador, &bloq, &tabela);    
+                        processoImpressao(conf, &cpus, escalonador, &bloq, &tabela);
                         exit(0);
                     }
                     // Processo pai espera o filho acabar para continuar
@@ -107,7 +107,7 @@ void gerencia_main(int controle_fd, Config conf) {
                             perror("[!] Falha ao esperar o processo de impressão [não existente]");
                         }
                     }
-                    
+
                     break;
             }
             if(tabela.contadorProcessos == 0) {
@@ -118,17 +118,17 @@ void gerencia_main(int controle_fd, Config conf) {
             }
         }
     }
-    liberaMultiCPUs(&cpus);
-    tpLiberaLista(&tabela);
-    bloqueados_libera(&bloq);
+    computadorLibera(&cpus);
+    tabelaProcessosLibera(&tabela);
+    bloqueadosLibera(&bloq);
 
     // Desaloca o escalonador apropriado
     switch(conf.esc) {
         case ESC_FILAS_MULTIPLAS:
-            liberaListas(escalonador);
+            filasMultiplasImprime(escalonador);
             break;
         case ESC_ROBIN:
-            robin_libera(escalonador);
+            filaLibera(escalonador);
             break;
         default:
             break;
@@ -137,36 +137,36 @@ void gerencia_main(int controle_fd, Config conf) {
     close(controle_fd);
 }
 
-void executaUnidadeTempo(Config conf, MultiCPUs* cpus, void *escalonador,
-        ListaBloqueados *listaBloq, TTabelaProcesso *tabela) {
+void executaUnidadeTempo(Config conf, Computador *c, void *escalonador,
+        ListaBloqueados *listaBloq, TabelaProcessos *tabela) {
     // A primeira coisa que deve ser feita é dar um tique de relógio na filas
     // de bloqueados para atualizar seus estados
-    bloqueados_tique(listaBloq);
+    bloqueadosTique(listaBloq);
 
     // Depois que o tique acontece, pode ser que algum processo tenha sido
     // desbloqueado. Se isso acontecer, devemos recuperar o seu ID e reinseri-lo
     // no escalonador (filas multiplas)
     int idProcessoDesbloqueado;
-    while((idProcessoDesbloqueado = bloqueados_remove0(listaBloq)) >= 0) {
+    while((idProcessoDesbloqueado = bloqueadosRemove0(listaBloq)) >= 0) {
         // O processo é reinserido no escalonador
-        esc_adiciona_processo(conf.esc, escalonador, tpAcessaProcesso(tabela,
+        escalonamentoAdiciona(conf.esc, escalonador, tabelaProcessosAcessa(tabela,
                     idProcessoDesbloqueado));
     }
-    executaProximaInstrucaoMulti(cpus);
+    computadorExecuta(c);
 }
 
-void processoImpressao(Config conf, MultiCPUs *cpus, void *escalonador, ListaBloqueados *bloq,
-        TTabelaProcesso *tabela) {
+void processoImpressao(Config conf, Computador *cpus, void *escalonador, ListaBloqueados *bloq,
+        TabelaProcessos *tabela) {
 
     printf("\n\tIMPRIMINDO DADOS DA(S) CPU(S):\n");
-    imprimeMultiCPUs(cpus);
+    computadorImprime(cpus);
 
     printf("\n\tIMPRIMINDO DADOS DO ESCALONADOR: \n");
-    esc_imprime_escalonador(conf.esc, escalonador);
+    escalonamentoImprime(conf.esc, escalonador);
 
     printf("\n\tIMPRIMINDO DADOS DA TABELA DE PROCESSOS: \n");
-    tpImprimeLista(tabela);
+    tabelaProcessosImprime(tabela);
 
     printf("\n\tIMPRIMINDO DADOS DA LISTA DE BLOQUEADOS:\n");
-    bloqueados_imprime(bloq);
+    bloqueadosImprime(bloq);
 }

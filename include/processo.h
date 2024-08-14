@@ -13,29 +13,28 @@ typedef enum {
 
 // Informações de um processo na tabela
 typedef struct {
-    int id, id_pai;         // ID do processo e do processo pai
-    int pc;                 // último valor do contador de programa (tempo de CPU)
-    int prioridade;         // prioridade do processo
-    int *reg, num_regs;     // registradores do processo
-    ProcessoEstado estado;  // estado do processo
-    TListaInstrucao codigo; // instruções do processo
-    int tempoInicio;        // unidade de tempo de ínicio
-} Tprocesso;
+    int id, idPai;         // ID do processo e do processo pai
+    int pc;                // último valor do contador de programa (tempo de CPU)
+    int prioridade;        // prioridade do processo
+    int *reg, numRegs;     // registradores do processo
+    ProcessoEstado estado; // estado do processo
+    Programa codigo;       // instruções do processo
+    int tempoInicio;       // unidade de tempo de ínicio
+} Processo;
 
+void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
+        int numRegs, Programa codigo, int tempoInicio);
 
-// Inicializa processo
-void processo_inicia(Tprocesso *proc, int id, int id_pai, int pc, int prioridade,
-        int num_regs, TListaInstrucao codigo, int tempoInicio);
-
-void processo_dados(const Tprocesso *proc);
+// Impressão resumida dos dados do processo
+void processoImprimeResumido(const Processo *proc);
 
 // Imprime os dados de um processo
-void processo_imprime(const Tprocesso *proc);
+void processoImprime(const Processo *proc);
 
 // Desaloca a memória associada a um processo
-void processo_libera(Tprocesso *proc);
+void processoLibera(Processo *proc);
 
-// Substituir código de um processo]
-void substituiPrograma(Tprocesso *proc, TListaInstrucao codigo, int num_regs);
+// Subsituir o código de um processo
+void processoSubstituiPrograma(Processo *proc, Programa codigo, int numRegs);
 
 #endif // PROCESSO_H

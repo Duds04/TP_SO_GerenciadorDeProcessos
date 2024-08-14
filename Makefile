@@ -2,7 +2,7 @@ CFLAGS=-Wall -Wextra -ggdb -std=c11
 INCDIR=include
 
 controle: main.o gerencia.o instrucao.o processo.o tabela.o bloqueados.o \
-	robin.o cpu.o multiplasCPUs.o filasID.o filasMultiplas.o escalonamento.o
+	fila.o cpu.o computador.o filasMultiplas.o escalonamento.o
 	$(CC) -o $@ $^
 
 main.o: src/main.c include/gerencia.h include/config.h
@@ -11,7 +11,7 @@ main.o: src/main.c include/gerencia.h include/config.h
 # Sim, essa linha é desconfortavelmente longa
 gerencia.o: src/gerencia.c include/gerencia.h include/bloqueados.h \
 	include/instrucao.h include/tabela.h include/cpu.h include/filasMultiplas.h \
-	include/escalonamento.h include/robin.h include/config.h
+	include/escalonamento.h include/fila.h include/config.h include/computador.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 instrucao.o: src/instrucao.c include/instrucao.h
@@ -26,20 +26,17 @@ tabela.o: src/tabela.c include/tabela.h
 bloqueados.o: src/bloqueados.c include/bloqueados.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-robin.o: src/robin.c include/robin.h
-	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
-
-filasID.o: src/filasID.c include/filasID.h
+fila.o: src/fila.c include/fila.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 cpu.o: src/cpu.c include/cpu.h include/tabela.h include/escalonamento.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-multiplasCPUs.o: src/multiplasCPUs.c include/multiplasCPUs.h include/cpu.h
+computador.o: src/computador.c include/computador.h include/cpu.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 filasMultiplas.o: src/filasMultiplas.c include/filasMultiplas.h \
-	include/filasID.h include/processo.h
+	include/processo.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 escalonamento.o: src/escalonamento.c include/escalonamento.h

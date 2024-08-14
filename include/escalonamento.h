@@ -15,15 +15,15 @@ typedef enum {
 } Escalonamento;
 
 // Adiciona um processo ao escalonador
-int esc_adiciona_processo(Escalonamento esc, void *escalonador, Tprocesso *proc);
+int escalonamentoAdiciona(Escalonamento esc, void *escalonador, Processo *proc);
 
 // Retira um processo do escalonador, retornando seu ID
-int esc_retira_processo(Escalonamento esc, void *escalonador);
+int escalonamentoRemove(Escalonamento esc, void *escalonador);
 
 // Fornece o tamanho do quantum, em unidades de tempo, correspondente ao número
 // de prioridade dado
-int esc_tamanho_quantum(Escalonamento esc, int prioridade);
+int escalonamentoQuantum(Escalonamento esc, int prioridade);
 
-void esc_imprime_escalonador(Escalonamento esc, void *escalonador);
+void escalonamentoImprime(Escalonamento esc, void *escalonador);
 
 #endif // ESCALONAMENTO_H

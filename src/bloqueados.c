@@ -5,59 +5,59 @@
 #define CAP_INICIAL 16
 
 // Inicializa lista de bloqueados
-void bloqueados_inicia(ListaBloqueados *lb) {
-    lb->processos = (ProcessoBloqueado*) malloc(CAP_INICIAL * sizeof(ProcessoBloqueado));
-    if(lb->processos == NULL) {
+void bloqueadosInicia(ListaBloqueados *bloq) {
+    bloq->processos = (ProcessoBloqueado*) malloc(CAP_INICIAL * sizeof(ProcessoBloqueado));
+    if(bloq->processos == NULL) {
         fprintf(stderr, "[!] Sem memória suficiente\n");
         exit(64);
     }
-    lb->tam = 0;
-    lb->capacidade = CAP_INICIAL;
+    bloq->tam = 0;
+    bloq->capacidade = CAP_INICIAL;
 }
 
 // Insere novo processo bloqueado na lista
-void bloqueados_insere(ListaBloqueados *lb, int pid, int tempo_restante) {
-    if(lb->tam + 1 > lb->capacidade) {
-        lb->processos = realloc(lb->processos,
-                lb->capacidade * 2 * sizeof(ProcessoBloqueado));
-        if(lb->processos == NULL) {
+void bloqueadosAdiciona(ListaBloqueados *bloq, int pid, int tempo_restante) {
+    if(bloq->tam + 1 > bloq->capacidade) {
+        bloq->processos = realloc(bloq->processos,
+                bloq->capacidade * 2 * sizeof(ProcessoBloqueado));
+        if(bloq->processos == NULL) {
             fprintf(stderr, "[!] Sem memória suficiente\n");
             exit(64);
         }
-        lb->capacidade *= 2;
+        bloq->capacidade *= 2;
     }
-    ProcessoBloqueado p = { .pid = pid, .tempo_restante = tempo_restante };
-    lb->processos[lb->tam++] = p;
+    ProcessoBloqueado p = { .pid = pid, .tempoRestante = tempo_restante };
+    bloq->processos[bloq->tam++] = p;
 }
 
 // Imprime a lista de bloqueados
-void bloqueados_imprime(const ListaBloqueados *lb) {
+void bloqueadosImprime(const ListaBloqueados *bloq) {
     printf("PID TEMPO\n-----------\n");
-    for(int i = 0; i < lb->tam; ++i)
-        printf("%02d %03d\n", lb->processos[i].pid,
-                lb->processos[i].tempo_restante);
+    for(int i = 0; i < bloq->tam; ++i)
+        printf("%02d %03d\n", bloq->processos[i].pid,
+                bloq->processos[i].tempoRestante);
 }
 
 // Decrementa o tempo restante em todos os processos por uma unidade. Todos os
 // processos onde o tempo restante torna-se zero (i.e. com desbloqueio pendente)
 // são movidos para o fim da lista
-void bloqueados_tique(ListaBloqueados *lb) {
-    int i = 0, final = lb->tam - 1;
+void bloqueadosTique(ListaBloqueados *bloq) {
+    int i = 0, final = bloq->tam - 1;
     // Antes de mais nada, é preciso garantir que os processos que já estão com
     // tempo zerado e no fim da lista estejam fora de consideração
-    while(final >= 0 && lb->processos[final].tempo_restante == 0) --final;
+    while(final >= 0 && bloq->processos[final].tempoRestante == 0) --final;
     if(final < 0) return; // nada a fazer
 
     while(i <= final) {
-        if(lb->processos[i].tempo_restante <= 0)
+        if(bloq->processos[i].tempoRestante <= 0)
             continue; // nem deveria acontecer
-        lb->processos[i].tempo_restante -= 1;
-        if(lb->processos[i].tempo_restante == 0) {
+        bloq->processos[i].tempoRestante -= 1;
+        if(bloq->processos[i].tempoRestante == 0) {
             // Processo com desbloqueio pendente; deve ser movido para o fim da
             // lista, para uma operação remove0 futura
-            ProcessoBloqueado aux = lb->processos[final];
-            lb->processos[final] = lb->processos[i];
-            lb->processos[i] = aux;
+            ProcessoBloqueado aux = bloq->processos[final];
+            bloq->processos[final] = bloq->processos[i];
+            bloq->processos[i] = aux;
             --final; // menos um processo a considerar
        } else {
            ++i; // passamos para o próximo processo
@@ -69,16 +69,16 @@ void bloqueados_tique(ListaBloqueados *lb) {
 // retornando seu ID. Caso não haja nenhum processo com tempo restante zerado,
 // retorna -1. Invoque repetidas vezes para desbloquear todos os processos com
 // desbloqueio pendente
-int bloqueados_remove0(ListaBloqueados *lb) {
-    if(lb->tam == 0) return -1;
-    if(lb->processos[lb->tam - 1].tempo_restante > 0) return -1;
-    return lb->processos[--lb->tam].pid;
+int bloqueadosRemove0(ListaBloqueados *bloq) {
+    if(bloq->tam == 0) return -1;
+    if(bloq->processos[bloq->tam - 1].tempoRestante > 0) return -1;
+    return bloq->processos[--bloq->tam].pid;
 }
 
 // Desaloca a memória para a lista de bloqueados
-void bloqueados_libera(ListaBloqueados *lb) {
-    free(lb->processos);
-    lb->processos = NULL;
-    lb->capacidade = 0;
-    lb->tam = 0;
+void bloqueadosLibera(ListaBloqueados *bloq) {
+    free(bloq->processos);
+    bloq->processos = NULL;
+    bloq->capacidade = 0;
+    bloq->tam = 0;
 }

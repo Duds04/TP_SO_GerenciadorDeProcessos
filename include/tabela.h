@@ -4,29 +4,28 @@
 #include "instrucao.h"
 #include "processo.h"
 
-typedef struct TTabelaProcesso {
-    Tprocesso *processos;
-    int ultimo;
-    int tamanho;
+typedef struct {
+    Processo *processos;
+    int ultimo, tamanho;
     int contadorProcessos; // conta os processos atuais em memória
     int contadorTodosProcessos; // conta quantos processos passaram pela CPU
-} TTabelaProcesso;
+} TabelaProcessos;
 
-void tpIniciaLista(TTabelaProcesso *pLista);
+void tabelaProcessosInicia(TabelaProcessos *tab);
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai
-int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
-        int num_regs, TListaInstrucao codigo, int tempoInicio);
+int tabelaProcessosAdiciona(TabelaProcessos *tab, int id_pai, int pc,
+        int num_regs, Programa codigo, int tempoInicio);
 
 // Finaliza um processo na tabela
-void tpFinalizaProcesso(TTabelaProcesso *pLista, int id);
+void tabelaProcessoRemove(TabelaProcessos *tab, int id);
 
 // Retorna um ponteiro para o processo dado seu ID
-Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id);
+Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id);
 
-void tpImprimeLista(TTabelaProcesso* pLista);
+void tabelaProcessosImprime(TabelaProcessos* tab);
 
-void tpLiberaLista(TTabelaProcesso *pLista);
+void tabelaProcessosLibera(TabelaProcessos *tab);
 
 #endif // TABELA_H

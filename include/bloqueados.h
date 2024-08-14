@@ -5,7 +5,7 @@
 // quantidade de unidades de tempo durante as quais o processo continuará
 // bloqueado
 typedef struct {
-    int pid, tempo_restante;
+    int pid, tempoRestante;
 } ProcessoBloqueado;
 
 // Estrutura de controle de processos bloqueados (vetor dinâmico)
@@ -15,26 +15,26 @@ typedef struct {
 } ListaBloqueados;
 
 // Inicializa lista de bloqueados
-void bloqueados_inicia(ListaBloqueados *lb);
+void bloqueadosInicia(ListaBloqueados *bloq);
 
 // Insere novo processo bloqueado na lista
-void bloqueados_insere(ListaBloqueados *lb, int pid, int tempo_restante);
+void bloqueadosAdiciona(ListaBloqueados *bloq, int pid, int tempo_restante);
 
 // Imprime a lista de bloqueados
-void bloqueados_imprime(const ListaBloqueados *lb);
+void bloqueadosImprime(const ListaBloqueados *bloq);
 
 // Decrementa o tempo restante em todos os processos por uma unidade. Todos os
 // processos onde o tempo restante torna-se zero (i.e. com desbloqueio pendente)
 // são movidos para o fim da lista
-void bloqueados_tique(ListaBloqueados *lb);
+void bloqueadosTique(ListaBloqueados *bloq);
 
 // Remove um processo bloqueado com tempo restante igual a zero da lista,
 // retornando seu ID. Caso não haja nenhum processo com tempo restante zerado,
 // retorna -1. Invoque repetidas vezes para desbloquear todos os processos com
 // desbloqueio pendente
-int bloqueados_remove0(ListaBloqueados *lb);
+int bloqueadosRemove0(ListaBloqueados *bloq);
 
 // Desaloca a memória para a lista de bloqueados
-void bloqueados_libera(ListaBloqueados *lb);
+void bloqueadosLibera(ListaBloqueados *bloq);
 
 #endif // BLOQUEADOS_H

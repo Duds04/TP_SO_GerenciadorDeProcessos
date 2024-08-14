@@ -7,7 +7,7 @@
 
 // Carrega uma instrução a partir da linha correspondente no código, retornando
 // um valor diferente de zero em caso de instrução inválida
-int carrega_instrucao(Instrucao *inst, const char *linha) {
+int instrucaoCarrega(Instrucao *inst, const char *linha) {
     // Cada linha no código deve ser iniciada pelo código de operação, seguido
     // dos seus argumentos separados por espaços em branco. O número e a
     // natureza desses argumentos dependem da operação
@@ -48,7 +48,7 @@ int carrega_instrucao(Instrucao *inst, const char *linha) {
     return 0;
 }
 
-void liIniciaLista(TListaInstrucao *pLista){
+void programaInicia(Programa *prog) {
     Instrucao *listInstruct;
 
     listInstruct = (Instrucao *) malloc(TAM_INIT * sizeof(Instrucao));
@@ -58,62 +58,58 @@ void liIniciaLista(TListaInstrucao *pLista){
         exit(1);
     }
 
-    pLista->tamanho = TAM_INIT;
-    pLista->intrucoes = listInstruct;
-    pLista->ultimo = 0;
+    prog->tamanho = TAM_INIT;
+    prog->intrucoes = listInstruct;
+    prog->ultimo = 0;
 }
 
-static void realoca(TListaInstrucao *pLista) {
-    pLista->intrucoes = realloc(pLista->intrucoes, pLista->tamanho*2 * sizeof(Instrucao));
+static void realoca(Programa *prog) {
+    prog->intrucoes = realloc(prog->intrucoes, prog->tamanho*2 * sizeof(Instrucao));
 
-    if (pLista->intrucoes == NULL) {
+    if (prog->intrucoes == NULL) {
         printf("Erro ao realocar memória!");
         exit(1);
     }
-    pLista->tamanho = pLista->tamanho*2;
+    prog->tamanho = prog->tamanho*2;
 }
 
-void liInsereFinal(TListaInstrucao *pLista, Instrucao instrucao){
-    if(pLista->ultimo >= pLista->tamanho) realoca(pLista);
-    pLista->intrucoes[pLista->ultimo] = instrucao;
-    pLista->ultimo++;
+void programaAdiciona(Programa *prog, Instrucao instrucao) {
+    if(prog->ultimo >= prog->tamanho) realoca(prog);
+    prog->intrucoes[prog->ultimo] = instrucao;
+    prog->ultimo++;
 }
 
-void liImprimeLista(const TListaInstrucao *pLista, int inicio){
-    for(int i=inicio; i<pLista->ultimo; i++){
-        liImprimeInstrucao(pLista->intrucoes[i]);
+void programaImprime(const Programa *prog, int inicio) {
+    for(int i=inicio; i<prog->ultimo; i++) {
+        instrucaoImprime(&prog->intrucoes[i]);
     }
 }
 
-void liImprimeInstrucao(Instrucao instrucao){
-    switch (instrucao.op){
+void instrucaoImprime(const Instrucao *inst) {
+    switch (inst->op) {
         case 'T':
-            printf("%c\n", instrucao.op);
+            printf("%c\n", inst->op);
             break;
         case 'N':
         case 'D':
         case 'B':
         case 'F':
-            printf("%c %d\n", instrucao.op, instrucao.arg0);
+            printf("%c %d\n", inst->op, inst->arg0);
             break;
         case 'V':
         case 'A':
         case 'S':
-            printf("%c %d %d\n", instrucao.op, instrucao.arg0, instrucao.arg1);
+            printf("%c %d %d\n", inst->op, inst->arg0, inst->arg1);
             break;
         case 'R':
-            printf("%c %s\n", instrucao.op, instrucao.arq);
+            printf("%c %s\n", inst->op, inst->arq);
             break;
     }
 
 }
 
-void liLiberaLista(TListaInstrucao *pLista){
-    free(pLista->intrucoes);
-}
-
 // Faz uma cópia profunda da lista de instruções
-void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst) {
+void programaCopia(const Programa *src, Programa *dst) {
     Instrucao *aux = (Instrucao*) malloc(src->tamanho * sizeof(Instrucao));
     if(aux == NULL) {
         printf("Erro ao alocar memória!");
@@ -127,21 +123,25 @@ void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst) {
 
 // Carrega um arquivo completo como uma lista de instruções. Retorna um número
 // positivo de registradores que devem ser alocados para o programa
-int carrega_executavel(TListaInstrucao *prog, FILE *arq) {
+int programaCarrega(Programa *prog, FILE *arq) {
     int reg = 0;
     char linha[64];
     Instrucao inst;
     while(fgets(linha, 64, arq) != NULL) {
         linha[strcspn(linha, "\r\n")] = '\0';
         // Carrega instruções ignorando as inválidas
-        if(carrega_instrucao(&inst, linha) != 0) continue;
+        if(instrucaoCarrega(&inst, linha) != 0) continue;
         if(inst.op == 'N') {
             // A instrução N é especial, pois dá informações que são necessárias
             // para a criação do processo. Por isso, ela é tratada aqui e não
             // tem efeito nenhum em tempo de execução
             reg += inst.arg0; // aumenta número de registradores
         }
-        liInsereFinal(prog, inst);
+        programaAdiciona(prog, inst);
     }
     return reg;
+}
+
+void programaLibera(Programa *prog) {
+    free(prog->intrucoes);
 }

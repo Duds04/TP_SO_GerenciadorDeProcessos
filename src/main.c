@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     // dados do usuário indiretamente a partir do pipe criado
     if(p == 0) {
         close(chan[1]);
-        gerencia_main(chan[0], conf);
+        gerencia(chan[0], conf);
         close(chan[0]);
         return 0;
     }

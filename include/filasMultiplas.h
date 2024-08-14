@@ -4,31 +4,27 @@
 #include <stdbool.h>
 
 #include "processo.h"
-#include "filasID.h"
+#include "fila.h"
 
 // Estrutura para armazenar as filas múltiplas
 typedef struct {
-    TFilaId vetorPrioridades[4];
-} TfilasPrioridades;
+    FilaID prioridade[4];
+} FilasMultiplas;
 
-typedef TfilasPrioridades* PfilasPrioridades;
+void filasMultiplasInicia(FilasMultiplas *filas);
 
-void inicializaTodasFilas(PfilasPrioridades filas);
+// Baseando-se nos dados do processo, adiciona seu ID à fila correta
+int filasMultiplasAdiciona(FilasMultiplas *filas, Processo *processo);
 
-// Recebe o id do processo e o estado anterior do processo (bloqueado ou
-// execucao) e coloca o processo no escalonador. Retorna 1 se der errado
-int enfileiraProcesso(PfilasPrioridades filas, Tprocesso *processo);
-
-// Retorna o id do processo a ser executado na vez atual. Retorna -1 se não
-// houver processo a ser executado
-int retiraProcesso(PfilasPrioridades filas);
+// Remove o ID do próximo processo a ser executado
+int filasMultiplasRemove(FilasMultiplas *filas);
 
 // Retorna o tamanho do quantum de acordo com a prioridade. Se a prioridade
 // for inválida, retorna 0
-int tamanhoQuantumPrioridade(int prioridade);
+int filasMultiplasQuantum(int prioridade);
 
-void imprimeFilasMultiplas(PfilasPrioridades filas);
+void filasMultiplasImprime(const FilasMultiplas *filas);
 
-void liberaListas(PfilasPrioridades filas);
+void filasMultiplasLibera(FilasMultiplas *filas);
 
 #endif

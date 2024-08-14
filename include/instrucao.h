@@ -12,25 +12,29 @@ typedef struct {
 
 // Carrega uma instrução a partir da linha correspondente no código, retornando
 // um valor diferente de zero em caso de instrução inválida
-int carrega_instrucao(Instrucao *inst, const char *linha);
+int instrucaoCarrega(Instrucao *inst, const char *linha);
 
+void instrucaoImprime(const Instrucao *inst);
+
+// Programa = lista de instruções
 typedef struct {
     Instrucao *intrucoes;
-    int ultimo;
-    int tamanho;
-} TListaInstrucao;
+    int ultimo, tamanho;
+} Programa;
 
-void liIniciaLista(TListaInstrucao *pLista);
-void liInsereFinal(TListaInstrucao *pLista, Instrucao instrucao);
-void liImprimeLista(const TListaInstrucao* pLista, int inicio);
-void liImprimeInstrucao(Instrucao instrucao);
-void liLiberaLista(TListaInstrucao *pLista);
+void programaInicia(Programa *prog);
+
+void programaAdiciona(Programa *prog, Instrucao inst);
+
+void programaImprime(const Programa *prog, int inicio);
 
 // Faz uma cópia profunda da lista de instruções
-void liCopiaProfunda(const TListaInstrucao *src, TListaInstrucao *dst);
+void programaCopia(const Programa *src, Programa *dst);
 
 // Carrega um arquivo completo como uma lista de instruções. Retorna um número
 // positivo de registradores que devem ser alocados para o programa
-int carrega_executavel(TListaInstrucao *prog, FILE *arq);
+int programaCarrega(Programa *prog, FILE *arq);
+
+void programaLibera(Programa *prog);
 
 #endif // INSTRUCOES_H

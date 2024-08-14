@@ -4,95 +4,95 @@
 #include "tabela.h"
 #include "processo.h"
 
-void tpIniciaLista(TTabelaProcesso *pLista){
-    Tprocesso *listProcess = (Tprocesso *) malloc(TAM_INIT * sizeof(Tprocesso));
+void tabelaProcessosInicia(TabelaProcessos *tab){
+    Processo *listProcess = (Processo *) malloc(TAM_INIT * sizeof(Processo));
     if (listProcess == NULL) {
         printf("Erro ao alocar memória!");
         exit(1);
     }
-    pLista->processos = listProcess;
-    pLista->tamanho = TAM_INIT;
-    pLista->ultimo = 0;
-    pLista->contadorProcessos = 0;
-    pLista->contadorTodosProcessos = 0;
+    tab->processos = listProcess;
+    tab->tamanho = TAM_INIT;
+    tab->ultimo = 0;
+    tab->contadorProcessos = 0;
+    tab->contadorTodosProcessos = 0;
 }
 
-static void tpAumentaTamanhoDaLista(TTabelaProcesso *pLista){
-    pLista->processos = realloc(pLista->processos, pLista->tamanho*2 * sizeof(Tprocesso));
-    if (pLista->processos == NULL) {
+static void aumentaTabela(TabelaProcessos *tab){
+    tab->processos = realloc(tab->processos, tab->tamanho * 2 * sizeof(Processo));
+    if (tab->processos == NULL) {
         printf("Erro ao realocar memória!");
         exit(1);
     }
-    pLista->tamanho = pLista->tamanho*2;
+    tab->tamanho = tab->tamanho*2;
 }
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai
-int tpAdicionaProcesso(TTabelaProcesso *pLista, int id_pai, int pc,
-        int num_regs, TListaInstrucao codigo, int tempoInicio) {
-    if(id_pai >= pLista->ultimo) {
+int tabelaProcessosAdiciona(TabelaProcessos *tab, int id_pai, int pc,
+        int num_regs, Programa codigo, int tempoInicio) {
+    if(id_pai >= tab->ultimo) {
         fprintf(stderr, "[!] ID %d inválido\n", id_pai);
         exit(1);
     }
     // Procura para ver se há algum processo finalizado na tabela
     int id = -1;
-    for(int i = 0; i < pLista->ultimo; ++i) {
-        if(pLista->processos[i].estado == EST_FINALIZADO) {
+    for(int i = 0; i < tab->ultimo; ++i) {
+        if(tab->processos[i].estado == EST_FINALIZADO) {
             id = i;
             break;
         }
     }
-    Tprocesso proc;
+    Processo proc;
     if(id < 0) {
         // Não foi encontrado um processo finalizado; adicionamos o processo
         // no final, checando se há memória suficiente
-        if(pLista->ultimo + 1 > pLista->tamanho)
-            tpAumentaTamanhoDaLista(pLista);
-        id = pLista->ultimo;
-        pLista->ultimo++;
+        if(tab->ultimo + 1 > tab->tamanho)
+            aumentaTabela(tab);
+        id = tab->ultimo;
+        tab->ultimo++;
     }
-    int prioridade = (id_pai < 0) ? 0 : pLista->processos[id_pai].prioridade;
-    processo_inicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
+    int prioridade = (id_pai < 0) ? 0 : tab->processos[id_pai].prioridade;
+    processoInicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
             tempoInicio);
-    pLista->processos[id] = proc;
-    pLista->contadorProcessos++;
-    pLista->contadorTodosProcessos++;
+    tab->processos[id] = proc;
+    tab->contadorProcessos++;
+    tab->contadorTodosProcessos++;
     return id;
 }
 
 // Finaliza um processo na tabela
-void tpFinalizaProcesso(TTabelaProcesso *pLista, int id) {
+void tabelaProcessoRemove(TabelaProcessos *tab, int id) {
     // ID inválido => erro do programador
-    if(id < 0 || id >= pLista->ultimo) {
+    if(id < 0 || id >= tab->ultimo) {
         fprintf(stderr, "[!] Processo de id %d não existe!\n", id);
         return;
     }
-    processo_libera(&pLista->processos[id]);
-    pLista->processos[id].estado = EST_FINALIZADO;
-    pLista->contadorProcessos--;
+    processoLibera(&tab->processos[id]);
+    tab->processos[id].estado = EST_FINALIZADO;
+    tab->contadorProcessos--;
 }
 
 // Retorna um ponteiro para o processo dado seu ID
-Tprocesso *tpAcessaProcesso(const TTabelaProcesso *pLista, int id) {
-    if(id < 0 || id >= pLista->ultimo) return NULL;
-    return &pLista->processos[id];
+Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id) {
+    if(id < 0 || id >= tab->ultimo) return NULL;
+    return &tab->processos[id];
 }
 
-void tpImprimeLista(TTabelaProcesso *pLista){
-    printf("Processos na tabela: %d\n", pLista->contadorProcessos);
-    printf("Memória alocada para %d processos\n", pLista->tamanho);
+void tabelaProcessosImprime(TabelaProcessos *tab){
+    printf("Processos na tabela: %d\n", tab->contadorProcessos);
+    printf("Memória alocada para %d processos\n", tab->tamanho);
     printf("====================================\n");
-    for(int i = 0; i < pLista->ultimo; i++)
-        if(pLista->processos[i].estado != EST_FINALIZADO){
-            processo_imprime(&pLista->processos[i]);
+    for(int i = 0; i < tab->ultimo; i++)
+        if(tab->processos[i].estado != EST_FINALIZADO){
+            processoImprime(&tab->processos[i]);
             printf("====================================\n");
         }
 
 }
 
-void tpLiberaLista(TTabelaProcesso *pLista){
-    for(int i=0; i<pLista->ultimo;i++)
-        if(pLista->processos[i].estado != EST_FINALIZADO)
-        processo_libera(&pLista->processos[i]);
-    free(pLista->processos);
+void tabelaProcessosLibera(TabelaProcessos *tab){
+    for(int i=0; i<tab->ultimo;i++)
+        if(tab->processos[i].estado != EST_FINALIZADO)
+        processoLibera(&tab->processos[i]);
+    free(tab->processos);
 }
