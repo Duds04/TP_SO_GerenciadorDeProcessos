@@ -5,8 +5,8 @@
 
 // Configuração do programa
 typedef struct {
-    int num_cpus;      // número de CPUs
-    Escalonamento esc; // algoritmo de escalonamento
+    int num_cpus;          // número de CPUs
+    EscalonamentoID escId; // algoritmo de escalonamento
 } Config;
 
 #endif // CONFIG_H

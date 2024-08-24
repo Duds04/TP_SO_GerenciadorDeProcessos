@@ -4,7 +4,7 @@
 
 // Inicializa processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        int numRegs, Programa codigo, int tempoInicio) {
+        Programa codigo, int tempoInicio) {
     proc->id = id;
     proc->idPai = idPai;
     proc->pc = pc;
@@ -14,12 +14,12 @@ void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
     proc->tempoInicio = tempoInicio;
 
     // Aloca a quantidade de registradores necessários
-    proc->reg = (int*) calloc(numRegs, sizeof(int));
+    proc->reg = (int*) calloc(codigo.numRegs, sizeof(int));
     if(proc->reg == NULL) {
         fprintf(stderr, "[!] Sem memória suficiente\n");
         exit(64);
     }
-    proc->numRegs = numRegs;
+    proc->numRegs = codigo.numRegs;
 }
 
 // Impressão resumida dos dados do processo
@@ -65,18 +65,18 @@ void processoLibera(Processo *proc) {
     free(proc->reg);
 }
 
-void processoSubstituiPrograma(Processo *proc, Programa codigo, int numRegs) {
+void processoSubstituiPrograma(Processo *proc, Programa codigo) {
     processoLibera(proc);
     proc->codigo = codigo;
     proc->pc = 0;
 
     // Aloca a quantidade de registradores necessários
-    proc->reg = (int*) calloc(numRegs, sizeof(int));
+    proc->reg = (int*) calloc(codigo.numRegs, sizeof(int));
     if(proc->reg == NULL) {
         fprintf(stderr, "[!] Sem memória suficiente\n");
         exit(64);
     }
-    proc->numRegs = numRegs;
+    proc->numRegs = codigo.numRegs;
 
 }
 

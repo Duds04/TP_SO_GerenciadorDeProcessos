@@ -9,12 +9,10 @@
 
 // Processador único
 typedef struct {
-    TabelaProcessos *tabela;         // referência para a tabela de processos
+    TabelaProcessos *tabela;          // referência para a tabela de processos
     ListaBloqueados *listaBloqueados; // lista de processos bloqueados
-    void *escalonador;                // referência para a estrutura do escalonador
-    Escalonamento esc;                // identificação do algoritmo de escalonamento
+    Escalonador esc;                  // escalonador
 
-    int tempo;            // contador de tempo
     int pidProcessoAtual; // ID do processo atual (mover na tabela de processos)
     int pc;               // Program Counter (instrução que o processo atual está)
     int quantum;          // tempo max de execução de um processo (em unidades)
@@ -24,17 +22,17 @@ typedef struct {
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação
 void cpuInicia(CPU *cpu, TabelaProcessos *tab,
-        ListaBloqueados *listaBloqueados, void *escalonador, Escalonamento esc);
+        ListaBloqueados *listaBloqueados, Escalonador esc);
 
 // Carrega um processo na CPU pelo ID, com quantum fixo
 void cpuCarregaProcesso(CPU *cpu, int pidProcessoAtual);
 
 // Executa a próxima instrução do processo atual
-int cpuExecutaProximaInstrucao(CPU *cpu);
+int cpuExecutaProximaInstrucao(CPU *cpu, int tempo);
 
 // Checa se não há nenhum processo carregado
 bool cpuEstaLivre(const CPU *cpu);
 
-void cpuImprime(const CPU *cpu, int numeroCPU);
+void cpuImprime(const CPU *cpu, int numeroCPU, int tempo);
 
 #endif // CPU_H

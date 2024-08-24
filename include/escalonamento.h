@@ -12,18 +12,30 @@ typedef enum {
     ESC_ROBIN = 0,
     ESC_FILAS_MULTIPLAS = 1,
     NUM_ESCALONAMENTOS,
-} Escalonamento;
+} EscalonamentoID;
+
+// Escalonador genérico
+typedef struct {
+    EscalonamentoID id;
+    void *dados;
+} Escalonador;
+
+// Inicializa um escalonador
+void escalonadorInicia(Escalonador *esc, EscalonamentoID escId);
 
 // Adiciona um processo ao escalonador
-int escalonamentoAdiciona(Escalonamento esc, void *escalonador, Processo *proc);
+int escalonadorAdiciona(Escalonador esc, Processo *proc);
 
 // Retira um processo do escalonador, retornando seu ID
-int escalonamentoRemove(Escalonamento esc, void *escalonador);
+int escalonadorRemove(Escalonador esc);
 
 // Fornece o tamanho do quantum, em unidades de tempo, correspondente ao número
 // de prioridade dado
-int escalonamentoQuantum(Escalonamento esc, int prioridade);
+int escalonadorQuantum(Escalonador esc, int prioridade);
 
-void escalonamentoImprime(Escalonamento esc, void *escalonador);
+void escalonadorImprime(Escalonador esc);
+
+// Desaloca a memória asssociada a um escalonador
+void escalonadorLibera(Escalonador esc);
 
 #endif // ESCALONAMENTO_H

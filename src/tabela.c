@@ -28,10 +28,10 @@ static void aumentaTabela(TabelaProcessos *tab){
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai
-int tabelaProcessosAdiciona(TabelaProcessos *tab, int id_pai, int pc,
-        int num_regs, Programa codigo, int tempoInicio) {
-    if(id_pai >= tab->ultimo) {
-        fprintf(stderr, "[!] ID %d inválido\n", id_pai);
+int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
+        Programa codigo, int tempoInicio) {
+    if(idPai >= tab->ultimo) {
+        fprintf(stderr, "[!] ID %d inválido\n", idPai);
         exit(1);
     }
     // Procura para ver se há algum processo finalizado na tabela
@@ -51,9 +51,8 @@ int tabelaProcessosAdiciona(TabelaProcessos *tab, int id_pai, int pc,
         id = tab->ultimo;
         tab->ultimo++;
     }
-    int prioridade = (id_pai < 0) ? 0 : tab->processos[id_pai].prioridade;
-    processoInicia(&proc, id, id_pai, pc, prioridade, num_regs, codigo,
-            tempoInicio);
+    int prioridade = (idPai < 0) ? 0 : tab->processos[idPai].prioridade;
+    processoInicia(&proc, id, idPai, pc, prioridade, codigo, tempoInicio);
     tab->processos[id] = proc;
     tab->contadorProcessos++;
     tab->contadorTodosProcessos++;
@@ -78,7 +77,7 @@ Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id) {
     return &tab->processos[id];
 }
 
-void tabelaProcessosImprime(TabelaProcessos *tab){
+void tabelaProcessosImprime(const TabelaProcessos *tab){
     printf("Processos na tabela: %d\n", tab->contadorProcessos);
     printf("Memória alocada para %d processos\n", tab->tamanho);
     printf("====================================\n");

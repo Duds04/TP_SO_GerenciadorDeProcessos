@@ -50,17 +50,15 @@ int instrucaoCarrega(Instrucao *inst, const char *linha) {
 
 void programaInicia(Programa *prog) {
     Instrucao *listInstruct;
-
     listInstruct = (Instrucao *) malloc(TAM_INIT * sizeof(Instrucao));
-
     if (listInstruct == NULL) {
         printf("Erro ao alocar memória!");
         exit(1);
     }
-
     prog->tamanho = TAM_INIT;
     prog->intrucoes = listInstruct;
     prog->ultimo = 0;
+    prog->numRegs = 0;
 }
 
 static void realoca(Programa *prog) {
@@ -119,11 +117,11 @@ void programaCopia(const Programa *src, Programa *dst) {
     dst->intrucoes = aux;
     dst->ultimo = src->ultimo;
     dst->tamanho = src->tamanho;
+    dst->numRegs = src->numRegs;
 }
 
-// Carrega um arquivo completo como uma lista de instruções. Retorna um número
-// positivo de registradores que devem ser alocados para o programa
-int programaCarrega(Programa *prog, FILE *arq) {
+// Carrega um arquivo completo como uma lista de instruções
+void programaCarrega(Programa *prog, FILE *arq) {
     int reg = 0;
     char linha[64];
     Instrucao inst;
@@ -139,7 +137,7 @@ int programaCarrega(Programa *prog, FILE *arq) {
         }
         programaAdiciona(prog, inst);
     }
-    return reg;
+    prog->numRegs = reg;
 }
 
 void programaLibera(Programa *prog) {

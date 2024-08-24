@@ -16,10 +16,11 @@ int instrucaoCarrega(Instrucao *inst, const char *linha);
 
 void instrucaoImprime(const Instrucao *inst);
 
-// Programa = lista de instruções
+// Programa = lista de instruções + número de registradores
 typedef struct {
     Instrucao *intrucoes;
     int ultimo, tamanho;
+    int numRegs;
 } Programa;
 
 void programaInicia(Programa *prog);
@@ -31,9 +32,8 @@ void programaImprime(const Programa *prog, int inicio);
 // Faz uma cópia profunda da lista de instruções
 void programaCopia(const Programa *src, Programa *dst);
 
-// Carrega um arquivo completo como uma lista de instruções. Retorna um número
-// positivo de registradores que devem ser alocados para o programa
-int programaCarrega(Programa *prog, FILE *arq);
+// Carrega um arquivo completo como uma lista de instruções
+void programaCarrega(Programa *prog, FILE *arq);
 
 void programaLibera(Programa *prog);
 

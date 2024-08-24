@@ -11,9 +11,8 @@
 static void zeraCPU(CPU *cpu) {
     cpu->tabela = NULL;
     cpu->listaBloqueados = NULL;
-    cpu->escalonador = NULL;
+    cpu->esc = (Escalonador){ .id = (-1), .dados = NULL };
 
-    cpu->tempo = 0;
     cpu->pidProcessoAtual = -1;
     cpu->pc = 0;
     cpu->quantum = 0;
@@ -24,11 +23,10 @@ static void zeraCPU(CPU *cpu) {
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação
 void cpuInicia(CPU *cpu, TabelaProcessos *tab,
-        ListaBloqueados *listaBloqueados, void *escalonador, Escalonamento esc) {
+        ListaBloqueados *listaBloqueados, Escalonador esc) {
     zeraCPU(cpu);
     cpu->tabela = tab;
     cpu->listaBloqueados = listaBloqueados;
-    cpu->escalonador = escalonador;
     cpu->esc = esc;
 }
 
@@ -47,7 +45,7 @@ void cpuCarregaProcesso(CPU *cpu, int pidProcessoAtual) {
     processo->estado = EST_EXECUTANDO;
     cpu->pidProcessoAtual = pidProcessoAtual;
     cpu->pc = processo->pc;
-    cpu->quantum = escalonamentoQuantum(cpu->esc, processo->prioridade);
+    cpu->quantum = escalonadorQuantum(cpu->esc, processo->prioridade);
     cpu->reg = processo->reg;
     cpu->numRegs = processo->numRegs;
     cpu->codigo = &processo->codigo;
@@ -86,12 +84,12 @@ static void instrucaoT(CPU *cpu){
 }
 
 // Cria um novo processo
-static void instrucaoF(int n, CPU *cpu) {
+static void instrucaoF(int n, CPU *cpu, int tempo) {
     Programa novoCodigo;
     programaCopia(cpu->codigo, &novoCodigo);
     int id = tabelaProcessosAdiciona(cpu->tabela, cpu->pidProcessoAtual, cpu->pc + 1,
-            cpu->numRegs, novoCodigo, cpu->tempo);
-    escalonamentoAdiciona(cpu->esc, cpu->escalonador, tabelaProcessosAcessa(cpu->tabela, id));
+            novoCodigo, tempo);
+    escalonadorAdiciona(cpu->esc, tabelaProcessosAcessa(cpu->tabela, id));
     cpu->pc += n;
 }
 
@@ -106,10 +104,10 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
 
     Programa novoCodigo;
     programaInicia(&novoCodigo);
-    int num_regs = programaCarrega(&novoCodigo, arquivo);
+    programaCarrega(&novoCodigo, arquivo);
     fclose(arquivo);
 
-    processoSubstituiPrograma(processo, novoCodigo, num_regs);
+    processoSubstituiPrograma(processo, novoCodigo);
     cpu->pc = 0;
 }
 
@@ -121,20 +119,20 @@ static void salvaContexto(CPU *cpu) {
         exit(1);
     }
     proc->pc = cpu->pc;
-    escalonamentoAdiciona(cpu->esc, cpu->escalonador, proc);
+    escalonadorAdiciona(cpu->esc, proc);
 }
 
-int cpuExecutaProximaInstrucao(CPU *cpu) {
+int cpuExecutaProximaInstrucao(CPU *cpu, int tempo) {
     if(cpuEstaLivre(cpu)) {
         // Se a CPU estiver vazia, carrega um processo do escalonador
-        int idProcessoAtual = escalonamentoRemove(cpu->esc, cpu->escalonador);
+        int idProcessoAtual = escalonadorRemove(cpu->esc);
         if (idProcessoAtual < 0) return 1; // sem processos
         cpuCarregaProcesso(cpu, idProcessoAtual);
     } else if(cpu->quantum == 0) {
         // O quantum do processo atual acabou; novamente, um processo deve ser
         // carregado do escalonador
         salvaContexto(cpu);
-        int idProcessoAtual = escalonamentoRemove(cpu->esc, cpu->escalonador);
+        int idProcessoAtual = escalonadorRemove(cpu->esc);
         if (idProcessoAtual < 0) {
             fprintf(stderr, "[!] Sem processos no escalonador\n");
             exit(0);
@@ -146,7 +144,6 @@ int cpuExecutaProximaInstrucao(CPU *cpu) {
         exit(1);
     }
 
-    cpu->tempo += 1;
     Instrucao instrucao = cpu->codigo->intrucoes[cpu->pc];
     printf("Executando instrução ");
     instrucaoImprime(&instrucao);
@@ -174,7 +171,7 @@ int cpuExecutaProximaInstrucao(CPU *cpu) {
             instrucaoT(cpu);
             break;
         case 'F':
-            instrucaoF(instrucao.arg0, cpu);
+            instrucaoF(instrucao.arg0, cpu, tempo);
             break;
         case 'R':
             instrucaoR(instrucao.arq, cpu);
@@ -185,12 +182,12 @@ int cpuExecutaProximaInstrucao(CPU *cpu) {
     }
 
     cpu->pc += 1;
-    cpu->quantum -= 1; // a cada instrução executada decrementa o quantum
+    cpu->quantum -= 1; // cada instrução executada decrementa o quantum
     return 0;
 }
 
-void cpuImprime(const CPU *cpu, int numeroCPU){
-    printf("TEMPO: %d\nQUANTUM: %d\n", cpu->tempo, cpu->quantum);
+void cpuImprime(const CPU *cpu, int numeroCPU, int tempo) {
+    printf("TEMPO: %d\nQUANTUM: %d\n", tempo, cpu->quantum);
     printf("ID DO PROCESSO ATUAL: %d\nPC DO PROCESSO ATUAL: %d\n------------------\n", cpu->pidProcessoAtual, cpu->pc);
     printf("\nDADOS DO PROCESSO NA CPU #%d\n------------------\n", numeroCPU+1);
     processoImprime(&cpu->tabela->processos[cpu->pidProcessoAtual]);

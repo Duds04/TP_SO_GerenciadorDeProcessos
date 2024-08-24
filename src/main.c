@@ -105,8 +105,8 @@ void config_read(Config *conf) {
     printf("%d. Round Robin\n", ESC_ROBIN);
     printf("%d. Filas múltiplas\n", ESC_FILAS_MULTIPLAS);
     printf("Selecione a opção desejada entre as acima: ");
-    scanf("%d", &conf->esc);
-    if(conf->esc < 0 || conf->esc >= NUM_ESCALONAMENTOS) {
+    scanf("%d", &conf->escId);
+    if(conf->escId < 0 || conf->escId >= NUM_ESCALONAMENTOS) {
         fprintf(stderr, "[!] Algoritmo de escalonamento inválido\n");
         exit(1);
     }

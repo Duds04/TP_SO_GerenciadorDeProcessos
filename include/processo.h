@@ -23,7 +23,7 @@ typedef struct {
 } Processo;
 
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        int numRegs, Programa codigo, int tempoInicio);
+        Programa codigo, int tempoInicio);
 
 // Impressão resumida dos dados do processo
 void processoImprimeResumido(const Processo *proc);
@@ -35,6 +35,6 @@ void processoImprime(const Processo *proc);
 void processoLibera(Processo *proc);
 
 // Subsituir o código de um processo
-void processoSubstituiPrograma(Processo *proc, Programa codigo, int numRegs);
+void processoSubstituiPrograma(Processo *proc, Programa codigo);
 
 #endif // PROCESSO_H

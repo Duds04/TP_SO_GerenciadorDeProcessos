@@ -15,8 +15,8 @@ void tabelaProcessosInicia(TabelaProcessos *tab);
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai
-int tabelaProcessosAdiciona(TabelaProcessos *tab, int id_pai, int pc,
-        int num_regs, Programa codigo, int tempoInicio);
+int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
+        Programa codigo, int tempoInicio);
 
 // Finaliza um processo na tabela
 void tabelaProcessoRemove(TabelaProcessos *tab, int id);
@@ -24,7 +24,7 @@ void tabelaProcessoRemove(TabelaProcessos *tab, int id);
 // Retorna um ponteiro para o processo dado seu ID
 Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id);
 
-void tabelaProcessosImprime(TabelaProcessos* tab);
+void tabelaProcessosImprime(const TabelaProcessos *tab);
 
 void tabelaProcessosLibera(TabelaProcessos *tab);
 
