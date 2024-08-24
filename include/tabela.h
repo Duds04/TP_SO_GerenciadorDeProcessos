@@ -1,6 +1,7 @@
 #ifndef TABELA_H
 #define TABELA_H
 
+#include <stdint.h>
 #include "instrucao.h"
 #include "processo.h"
 

@@ -4,7 +4,7 @@
 #include "tabela.h"
 #include "processo.h"
 
-void tabelaProcessosInicia(TabelaProcessos *tab){
+void tabelaProcessosInicia(TabelaProcessos *tab) {
     Processo *listProcess = (Processo *) malloc(TAM_INIT * sizeof(Processo));
     if (listProcess == NULL) {
         printf("Erro ao alocar memória!");

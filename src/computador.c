@@ -1,10 +1,12 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "bloqueados.h"
 #include "cpu.h"
 #include "tabela.h"
 #include "computador.h"
+#include "bloqueados.h"
 #include "escalonamento.h"
 
 // Inicializa o computador (TODO refatorar isso, parâmetros demais)
@@ -18,7 +20,6 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
         exit(64);
     }
     sis->tempo = 0;
-
     escalonadorInicia(&sis->esc, escId);
     tabelaProcessosInicia(&sis->tabela);
     bloqueadosInicia(&sis->bloq);

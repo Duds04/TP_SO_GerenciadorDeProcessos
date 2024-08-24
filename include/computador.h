@@ -1,7 +1,8 @@
-#ifndef MULTIPLASCPUS_H
-#define MULTIPLASCPUS_H
+#ifndef COMPUTADOR_H
+#define COMPUTADOR_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "cpu.h"
 #include "instrucao.h"
@@ -35,5 +36,5 @@ void computadorImprime(const Computador *sis);
 // Desaloca a memória associada ao computador
 void computadorLibera(Computador *sis);
 
-#endif // MULTIPLASCPUS_H
+#endif // COMPUTADOR_H
 
