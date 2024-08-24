@@ -58,7 +58,7 @@ int32_t *memoriaAloca(Memoria *mem, int n) {
             // Foi encontrada uma sequência de páginas livres adequada!
             // Começa a partir da posição primeiraLivre. Essas páginas serão
             // marcadas como ocupadas
-            mem->ocupadas &= mascaraSeq(numPaginas, primeiraLivre);
+            mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
             return (int32_t *) acessaPagina(mem, primeiraLivre);
         }
     }
