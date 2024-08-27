@@ -1,15 +1,19 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "tabela.h"
+#include "memoria.h"
 #include "processo.h"
 
-void tabelaProcessosInicia(TabelaProcessos *tab) {
+// Inicializa a tabela, conectando-a à memória
+void tabelaProcessosInicia(TabelaProcessos *tab, Memoria *mem) {
     Processo *listProcess = (Processo *) malloc(TAM_INIT * sizeof(Processo));
     if (listProcess == NULL) {
-        printf("Erro ao alocar memória!");
+        fprintf(stderr, "[!] Erro ao alocar memória para a tabela de processos\n");
         exit(1);
     }
+    tab->mem = mem;
     tab->processos = listProcess;
     tab->tamanho = TAM_INIT;
     tab->ultimo = 0;
@@ -17,10 +21,11 @@ void tabelaProcessosInicia(TabelaProcessos *tab) {
     tab->contadorTodosProcessos = 0;
 }
 
-static void aumentaTabela(TabelaProcessos *tab){
+// Duplica a quantidade de memória alocada para a tabela
+static void aumentaTabela(TabelaProcessos *tab) {
     tab->processos = realloc(tab->processos, tab->tamanho * 2 * sizeof(Processo));
     if (tab->processos == NULL) {
-        printf("Erro ao realocar memória!");
+        fprintf(stderr, "[!] Erro ao realocar memória para a tabela de processos\n");
         exit(1);
     }
     tab->tamanho = tab->tamanho*2;
@@ -51,8 +56,9 @@ int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
         id = tab->ultimo;
         tab->ultimo++;
     }
+    int32_t *regs = memoriaAloca(tab->mem, codigo.numRegs);
     int prioridade = (idPai < 0) ? 0 : tab->processos[idPai].prioridade;
-    processoInicia(&proc, id, idPai, pc, prioridade, codigo, tempoInicio);
+    processoInicia(&proc, id, idPai, pc, prioridade, codigo, tempoInicio, regs);
     tab->processos[id] = proc;
     tab->contadorProcessos++;
     tab->contadorTodosProcessos++;
@@ -66,8 +72,10 @@ void tabelaProcessoRemove(TabelaProcessos *tab, int id) {
         fprintf(stderr, "[!] Processo de id %d não existe!\n", id);
         return;
     }
-    processoLibera(&tab->processos[id]);
-    tab->processos[id].estado = EST_FINALIZADO;
+    Processo *proc = &tab->processos[id];
+    memoriaLibera(tab->mem, proc->codigo.numRegs, proc->reg);
+    processoLibera(proc);
+    proc->estado = EST_FINALIZADO;
     tab->contadorProcessos--;
 }
 
@@ -86,7 +94,6 @@ void tabelaProcessosImprime(const TabelaProcessos *tab){
             processoImprime(&tab->processos[i]);
             printf("====================================\n");
         }
-
 }
 
 void tabelaProcessosLibera(TabelaProcessos *tab){

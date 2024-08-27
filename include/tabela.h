@@ -1,18 +1,20 @@
 #ifndef TABELA_H
 #define TABELA_H
 
-#include <stdint.h>
-#include "instrucao.h"
+#include "memoria.h"
 #include "processo.h"
+#include "programa.h"
 
 typedef struct {
+    Memoria *mem; // referência para a memória, para alocar p/ processos
     Processo *processos;
     int ultimo, tamanho;
     int contadorProcessos; // conta os processos atuais em memória
     int contadorTodosProcessos; // conta quantos processos passaram pela CPU
 } TabelaProcessos;
 
-void tabelaProcessosInicia(TabelaProcessos *tab);
+// Inicializa a tabela, conectando-a à memória
+void tabelaProcessosInicia(TabelaProcessos *tab, Memoria *mem);
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai

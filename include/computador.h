@@ -5,14 +5,15 @@
 #include <stdint.h>
 
 #include "cpu.h"
-#include "instrucao.h"
 #include "tabela.h"
+#include "memoria.h"
 #include "bloqueados.h"
 #include "escalonamento.h"
 
 // Estrutura que representa um computador, com múltiplas CPUs
 typedef struct {
     CPU *cpus; int numCPUs; // múltiplas CPUs
+    Memoria mem;            // memória principal
     TabelaProcessos tabela; // tabela de processos
     ListaBloqueados bloq;   // estrutura de controle de processos bloqueados
     Escalonador esc;        // algoritmo de escalonamento
@@ -37,4 +38,3 @@ void computadorImprime(const Computador *sis);
 void computadorLibera(Computador *sis);
 
 #endif // COMPUTADOR_H
-

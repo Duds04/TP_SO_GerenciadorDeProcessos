@@ -1,7 +1,6 @@
 #ifndef INSTRUCAO_H
 #define INSTRUCAO_H
 
-#include <stdio.h>
 #define TAM_INIT 32
 
 typedef struct {
@@ -15,26 +14,5 @@ typedef struct {
 int instrucaoCarrega(Instrucao *inst, const char *linha);
 
 void instrucaoImprime(const Instrucao *inst);
-
-// Programa = lista de instruções + número de registradores
-typedef struct {
-    Instrucao *intrucoes;
-    int ultimo, tamanho;
-    int numRegs;
-} Programa;
-
-void programaInicia(Programa *prog);
-
-void programaAdiciona(Programa *prog, Instrucao inst);
-
-void programaImprime(const Programa *prog, int inicio);
-
-// Faz uma cópia profunda da lista de instruções
-void programaCopia(const Programa *src, Programa *dst);
-
-// Carrega um arquivo completo como uma lista de instruções
-void programaCarrega(Programa *prog, FILE *arq);
-
-void programaLibera(Programa *prog);
 
 #endif // INSTRUCOES_H

@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "programa.h"
 #include "processo.h"
 
-// Inicializa processo
+// Inicializa um novo processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        Programa codigo, int tempoInicio) {
+        Programa codigo, int tempoInicio, int32_t *reg) {
     proc->id = id;
     proc->idPai = idPai;
     proc->pc = pc;
@@ -12,14 +14,7 @@ void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
     proc->estado = EST_PRONTO; // começa no estado pronto
     proc->codigo = codigo;
     proc->tempoInicio = tempoInicio;
-
-    // Aloca a quantidade de registradores necessários
-    proc->reg = (int*) calloc(codigo.numRegs, sizeof(int));
-    if(proc->reg == NULL) {
-        fprintf(stderr, "[!] Sem memória suficiente\n");
-        exit(64);
-    }
-    proc->numRegs = codigo.numRegs;
+    proc->reg = reg;
 }
 
 // Impressão resumida dos dados do processo
@@ -49,7 +44,7 @@ void processoImprime(const Processo *proc) {
     }
 
     printf("REGISTRADORES:\n-----------------\n");
-    for(int r = 0; r < proc->numRegs; ++r)
+    for(int r = 0; r < proc->codigo.numRegs; ++r)
         printf("r%d: %d\n", r, proc->reg[r]);
     printf("-----------------\n");
 
@@ -62,21 +57,9 @@ void processoImprime(const Processo *proc) {
 // Desaloca a memória associada a um processo
 void processoLibera(Processo *proc) {
     programaLibera(&proc->codigo);
-    free(proc->reg);
 }
 
 void processoSubstituiPrograma(Processo *proc, Programa codigo) {
-    processoLibera(proc);
-    proc->codigo = codigo;
-    proc->pc = 0;
-
-    // Aloca a quantidade de registradores necessários
-    proc->reg = (int*) calloc(codigo.numRegs, sizeof(int));
-    if(proc->reg == NULL) {
-        fprintf(stderr, "[!] Sem memória suficiente\n");
-        exit(64);
-    }
-    proc->numRegs = codigo.numRegs;
-
+    fprintf(stderr, "[!] Substituição da imagem ainda não foi implementada!\n");
+    exit(1024);
 }
-

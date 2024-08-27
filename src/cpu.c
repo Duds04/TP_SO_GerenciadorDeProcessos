@@ -47,7 +47,7 @@ void cpuCarregaProcesso(CPU *cpu, int pidProcessoAtual) {
     cpu->pc = processo->pc;
     cpu->quantum = escalonadorQuantum(cpu->esc, processo->prioridade);
     cpu->reg = processo->reg;
-    cpu->numRegs = processo->numRegs;
+    cpu->numRegs = processo->codigo.numRegs;
     cpu->codigo = &processo->codigo;
 }
 

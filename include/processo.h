@@ -1,7 +1,8 @@
 #ifndef PROCESSO_H
 #define PROCESSO_H
 
-#include "instrucao.h"
+#include <stdint.h>
+#include "programa.h"
 
 // Estados em que um processo pode estar
 typedef enum {
@@ -16,14 +17,15 @@ typedef struct {
     int id, idPai;         // ID do processo e do processo pai
     int pc;                // último valor do contador de programa (tempo de CPU)
     int prioridade;        // prioridade do processo
-    int *reg, numRegs;     // registradores do processo
+    int32_t *reg;          // registradores do processo (na memória principal)
     ProcessoEstado estado; // estado do processo
     Programa codigo;       // instruções do processo
     int tempoInicio;       // unidade de tempo de ínicio
 } Processo;
 
+// Inicializa um novo processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        Programa codigo, int tempoInicio);
+        Programa codigo, int tempoInicio, int32_t *reg);
 
 // Impressão resumida dos dados do processo
 void processoImprimeResumido(const Processo *proc);

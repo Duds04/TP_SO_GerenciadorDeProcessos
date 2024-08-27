@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "cpu.h"
+#include "memoria.h"
 #include "tabela.h"
 #include "computador.h"
 #include "bloqueados.h"
@@ -20,8 +21,9 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
         exit(64);
     }
     sis->tempo = 0;
+    memoriaInicia(&sis->mem);
     escalonadorInicia(&sis->esc, escId);
-    tabelaProcessosInicia(&sis->tabela);
+    tabelaProcessosInicia(&sis->tabela, &sis->mem);
     bloqueadosInicia(&sis->bloq);
 
     // Inserindo o programa inicial na tabela e no escalonamento

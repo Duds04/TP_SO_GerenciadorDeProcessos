@@ -8,8 +8,8 @@
 #include <signal.h>
 
 #include "gerencia.h"
-#include "instrucao.h"
 #include "computador.h"
+#include "programa.h"
 
 #define BUF_MAX 64
 

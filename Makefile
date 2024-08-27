@@ -1,8 +1,9 @@
 CFLAGS=-Wall -Wextra -ggdb -std=c11
 INCDIR=include
 
-controle: main.o gerencia.o instrucao.o processo.o tabela.o bloqueados.o \
-	fila.o cpu.o computador.o filasMultiplas.o escalonamento.o memoria.o
+controle: main.o gerencia.o processo.o tabela.o bloqueados.o fila.o cpu.o \
+	computador.o filasMultiplas.o escalonamento.o memoria.o programa.o \
+	instrucao.o
 	$(CC) -o $@ $^
 
 main.o: src/main.c include/gerencia.h include/config.h
@@ -16,10 +17,13 @@ gerencia.o: src/gerencia.c include/gerencia.h \
 instrucao.o: src/instrucao.c include/instrucao.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-processo.o: src/processo.c include/processo.h
+programa.o: src/programa.c include/programa.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
-tabela.o: src/tabela.c include/tabela.h
+processo.o: src/processo.c include/processo.h include/programa.h
+	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
+
+tabela.o: src/tabela.c include/tabela.h include/processo.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 bloqueados.o: src/bloqueados.c include/bloqueados.h
