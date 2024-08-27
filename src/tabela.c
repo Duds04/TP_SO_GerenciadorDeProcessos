@@ -57,6 +57,10 @@ int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
         tab->ultimo++;
     }
     int32_t *regs = memoriaAloca(tab->mem, codigo.numRegs);
+    if(regs == NULL) {
+        fprintf(stderr, "[!] Acabou a memória\n");
+        exit(64);
+    }
     int prioridade = (idPai < 0) ? 0 : tab->processos[idPai].prioridade;
     processoInicia(&proc, id, idPai, pc, prioridade, codigo, tempoInicio, regs);
     tab->processos[id] = proc;
