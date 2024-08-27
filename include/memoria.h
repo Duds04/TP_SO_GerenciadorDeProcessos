@@ -14,6 +14,7 @@ typedef uint16_t bitmap_t;
 typedef struct {
     uint8_t conteudo[TAMANHO_MEM];
     bitmap_t ocupadas; // bitmap de controle de páginas livres
+    int ultimaPos; // usado no nextfit que guarda ultima posição alocada
 } Memoria;
 
 void memoriaInicia(Memoria *mem);
@@ -24,5 +25,8 @@ int32_t *memoriaAloca(Memoria *mem, int n);
 // Desaloca um vetor de n variáveis inteiras (4 bytes cada) da memória
 // principal, dado um ponteiro para sua localização
 void memoriaLibera(Memoria *mem, int n, int32_t *ptr);
+
+int32_t *firstfit(Memoria *mem, int n);
+
 
 #endif // MEMORIA_H

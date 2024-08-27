@@ -3,6 +3,8 @@
 #include <string.h>
 #include "memoria.h"
 
+#define INC_MOD(i, cap) (((i) + 1) & ((cap) - 1))
+
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
     return a / b + (a % b != 0);
@@ -34,35 +36,14 @@ void memoriaInicia(Memoria *mem) {
     memset(mem->conteudo, 0, TAMANHO_MEM * sizeof(uint8_t));
     // Todas as páginas começam livres
     mem->ocupadas = 0;
+    mem->ultimaPos = 0;
 }
 
 // Aloca um vetor de n variáveis inteiras (4 bytes cada) na memória principal
 int32_t *memoriaAloca(Memoria *mem, int n) {
-    if(n == 0) return NULL;
-    int numPaginas = numPaginasVar(n);
 
-    // Encontra essa quantidade de páginas livres na memória. (first-fit)
-    int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
-    for(int i = 0; i < 16; ++i) {
-        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
-        // paginaOcupada. Bit ligado => página correspondente não está livre
-        int paginaOcupada = ocupadas & 1;
-        ocupadas >>= 1;
-        if(!paginaOcupada) {
-            ++contaLivres;
-            if(primeiraLivre < 0) primeiraLivre = i;
-        } else {
-            primeiraLivre = -1;
-        }
-        if(contaLivres == numPaginas) {
-            // Foi encontrada uma sequência de páginas livres adequada!
-            // Começa a partir da posição primeiraLivre. Essas páginas serão
-            // marcadas como ocupadas
-            mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
-            return (int32_t *) acessaPagina(mem, primeiraLivre);
-        }
-    }
-    return NULL; // não foi possível alocar...
+    return firstfit(mem, n); // retorna função
+
 }
 
 // Desaloca um vetor de n variáveis inteiras (4 bytes cada) da memória
@@ -77,4 +58,67 @@ void memoriaLibera(Memoria *mem, int n, int32_t *fakePtr) {
     int indicePagina = indice / TAMANHO_PAG;
     int numPaginas = numPaginasVar(n);
     mem->ocupadas &= ~mascaraSeq(numPaginas, indicePagina);
+}
+
+int32_t *firstfit(Memoria *mem, int n){
+    // se precisar alocar 0 espaços, não aloca
+    if(n == 0) return NULL;
+    int numPaginas = numPaginasVar(n);
+
+    // Encontra essa quantidade de páginas livres na memória. (first-fit)
+    int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
+    for(int i = 0; i < 16; ++i) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+        if(!paginaOcupada) {
+            ++contaLivres;
+            if(primeiraLivre < 0) primeiraLivre = i;
+        } else {
+            primeiraLivre = -1;
+            contaLivres = 0;
+        }
+        if(contaLivres == numPaginas) {
+            // Foi encontrada uma sequência de páginas livres adequada!
+            // Começa a partir da posição primeiraLivre. Essas páginas serão
+            // marcadas como ocupadas
+            mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
+            return (int32_t *) acessaPagina(mem, primeiraLivre);
+        }
+    }
+    return NULL; // não foi possível alocar...
+}
+
+int32_t *nextfit(Memoria *mem, int n){
+
+    if(n == 0) return NULL;
+    int numPaginas = numPaginasVar(n);
+    
+    int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
+    for(int i = 0; i < 16; ++i) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+        if(!paginaOcupada) {
+            ++contaLivres;
+            if(primeiraLivre < 0) primeiraLivre = i;
+        } else {
+            primeiraLivre = -1;
+            contaLivres = 0;
+        }
+        if(contaLivres == numPaginas) {
+            // Foi encontrada uma sequência de páginas livres adequada!
+            // Começa a partir da posição primeiraLivre. Essas páginas serão
+            // marcadas como ocupadas
+            mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
+            return (int32_t *) acessaPagina(mem, primeiraLivre);
+        }
+    }
+    return NULL; // não foi possível alocar...
 }
