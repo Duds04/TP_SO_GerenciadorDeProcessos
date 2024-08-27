@@ -158,12 +158,12 @@ int32_t *bestfit(Memoria *mem, int n){
 
     // não existe espaço maior que 16
     if(melhorEspaco <= 16) {
-            // Foi encontrada uma sequência de páginas livres adequada!
-            // Começa a partir da posição melhorLugar. Essas páginas serão
-            // marcadas como ocupadas
-            mem->ocupadas |= mascaraSeq(numPaginas, melhorLugar);
-            return (int32_t *) acessaPagina(mem, melhorLugar);
-        }
+        // Foi encontrada uma sequência de páginas livres adequada!
+        // Começa a partir da posição melhorLugar. Essas páginas serão
+        // marcadas como ocupadas
+        mem->ocupadas |= mascaraSeq(numPaginas, melhorLugar);
+        return (int32_t *) acessaPagina(mem, melhorLugar);
+    }
     return NULL; // não foi possível alocar...
 }
 
@@ -202,11 +202,11 @@ int32_t *worstfit(Memoria *mem, int n){
     }
 
     if(piorEspaco > numPaginas-1) {
-            // Foi encontrada uma sequência de páginas livres adequada!
-            // Começa a partir da posição piorLugar. Essas páginas serão
-            // marcadas como ocupadas
-            mem->ocupadas |= mascaraSeq(numPaginas, piorLugar);
-            return (int32_t *) acessaPagina(mem, piorLugar);
-        }
+        // Foi encontrada uma sequência de páginas livres adequada!
+        // Começa a partir da posição piorLugar. Essas páginas serão
+        // marcadas como ocupadas
+        mem->ocupadas |= mascaraSeq(numPaginas, piorLugar);
+        return (int32_t *) acessaPagina(mem, piorLugar);
+    }
     return NULL; // não foi possível alocar...
 }
