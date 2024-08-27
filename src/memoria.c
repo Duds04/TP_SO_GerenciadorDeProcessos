@@ -3,7 +3,6 @@
 #include <string.h>
 #include "memoria.h"
 
-#define INC_MOD(i, cap) (((i) + 1) & ((cap) - 1))
 
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
@@ -98,7 +97,7 @@ int32_t *nextfit(Memoria *mem, int n){
     int numPaginas = numPaginasVar(n);
     
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
-    for(int i = 0; i < 16; ++i) {
+    for(int i = mem->ultimaPos; i < 16; i = (i+1)%16) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -120,5 +119,94 @@ int32_t *nextfit(Memoria *mem, int n){
             return (int32_t *) acessaPagina(mem, primeiraLivre);
         }
     }
+    return NULL; // não foi possível alocar...
+}
+
+int32_t *bestfit(Memoria *mem, int n){
+
+    if(n == 0) return NULL;
+    int numPaginas = numPaginasVar(n);
+    
+    int contaLivres = 0, melhorLugar = -1, ocupadas = mem->ocupadas, melhorEspaco = 17, lugarAtual=-1;
+
+    for(int i = 0; i < 16; ++i) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+        if(!paginaOcupada) {
+            ++contaLivres;
+            if(lugarAtual < 0) lugarAtual = i;
+        } else {
+            // se encontra pagina ocupada verifica se é um espaço melhor
+            if (contaLivres>=numPaginas && contaLivres < melhorEspaco){
+                melhorEspaco = contaLivres;
+                melhorLugar = lugarAtual;
+            }
+            lugarAtual = -1;
+            contaLivres = 0;
+        }
+        
+    }
+    // se chega no fim, verifica se é um espaço melhor
+    if(contaLivres>=numPaginas && contaLivres < melhorEspaco){
+        melhorEspaco = contaLivres;
+        melhorLugar = lugarAtual;
+    }
+
+    // não existe espaço maior que 16
+    if(melhorEspaco <= 16) {
+            // Foi encontrada uma sequência de páginas livres adequada!
+            // Começa a partir da posição melhorLugar. Essas páginas serão
+            // marcadas como ocupadas
+            mem->ocupadas |= mascaraSeq(numPaginas, melhorLugar);
+            return (int32_t *) acessaPagina(mem, melhorLugar);
+        }
+    return NULL; // não foi possível alocar...
+}
+
+int32_t *worstfit(Memoria *mem, int n){
+
+    if(n == 0) return NULL;
+    int numPaginas = numPaginasVar(n);
+    
+    int contaLivres = 0, piorLugar = -1, ocupadas = mem->ocupadas, piorEspaco = numPaginas-1, lugarAtual=-1;
+
+    for(int i = 0; i < 16; ++i) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+        if(!paginaOcupada) {
+            ++contaLivres;
+            if(lugarAtual < 0) lugarAtual = i;
+        } else {
+            // se encontra pagina ocupada verifica se é um espaço pior
+            if (contaLivres>=numPaginas && contaLivres > piorEspaco){
+                piorEspaco = contaLivres;
+                piorLugar = lugarAtual;
+            }
+            lugarAtual = -1;
+            contaLivres = 0;
+        }
+        
+    }
+    // se chega no fim, verifica se é um espaço pior
+    if(contaLivres>=numPaginas && contaLivres > piorEspaco){
+        piorEspaco = contaLivres;
+        piorLugar = lugarAtual;
+    }
+
+    if(piorEspaco > numPaginas-1) {
+            // Foi encontrada uma sequência de páginas livres adequada!
+            // Começa a partir da posição piorLugar. Essas páginas serão
+            // marcadas como ocupadas
+            mem->ocupadas |= mascaraSeq(numPaginas, piorLugar);
+            return (int32_t *) acessaPagina(mem, piorLugar);
+        }
     return NULL; // não foi possível alocar...
 }
