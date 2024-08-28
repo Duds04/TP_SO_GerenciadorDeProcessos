@@ -143,8 +143,6 @@ int32_t *nextfit(Memoria *mem, int n){
     // em que atualiza o mem->ultimaPos quando se desalocar um valor, mas fugiria
     // do algorítmo
 
-    // verifica se há espaços livres o suficiente de 0 até o primeiro 1 depois 
-    // da ultima posição livre
     contaLivres = 0;
     primeiraLivre = -1;
     ocupadas = mem->ocupadas;
