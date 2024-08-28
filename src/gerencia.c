@@ -52,7 +52,7 @@ void gerencia(int controle_fd, Config conf) {
 
     // Inicializa o sistema com o processo inicial
     Computador sis;
-    computadorInicia(&sis, conf.num_cpus, conf.escId, programaInit);
+    computadorInicia(&sis, conf.numCpus, conf.escId, conf.alocId, programaInit);
 
     bool ok = true;
     char buf[BUF_MAX];

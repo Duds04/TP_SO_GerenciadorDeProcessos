@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include "gerencia.h"
 #include "config.h"
+#include "memoria.h"
 
 #define MAX 64
 
@@ -95,8 +96,8 @@ int main(int argc, char *argv[]) {
 void config_read(Config *conf) {
     printf("== CONFIGURAÇÃO DE SIMULAÇÃO ==\n");
     printf("Número de CPUs simuladas: ");
-    scanf("%d", &conf->num_cpus);
-    if(conf->num_cpus <= 0) {
+    scanf("%d", &conf->numCpus);
+    if(conf->numCpus <= 0) {
         fprintf(stderr, "[!] Número de CPUs deve ser positivo\n");
         exit(1);
     }
@@ -108,6 +109,18 @@ void config_read(Config *conf) {
     scanf("%d", &conf->escId);
     if(conf->escId < 0 || conf->escId >= NUM_ESCALONAMENTOS) {
         fprintf(stderr, "[!] Algoritmo de escalonamento inválido\n");
+        exit(1);
+    }
+
+    printf("\nAlgoritmos de alocação de memória:\n");
+    printf("%d. First-fit\n", ALOC_FIRST_FIT);
+    printf("%d. Next-fit\n", ALOC_NEXT_FIT);
+    printf("%d. Best-fit\n", ALOC_BEST_FIT);
+    printf("%d. Worst-fit\n", ALOC_WORST_FIT);
+    printf("Selecione a opção desejada entre as acima: ");
+    scanf("%d", &conf->alocId);
+    if(conf->alocId < 0 || conf->alocId >= NUM_ALOCS) {
+        fprintf(stderr, "[!] Algoritmo de substituição de memória inválido\n");
         exit(1);
     }
     getchar(); // '\n' sobressalente

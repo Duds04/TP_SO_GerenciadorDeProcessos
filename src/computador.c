@@ -12,7 +12,7 @@
 
 // Inicializa o computador (TODO refatorar isso, parâmetros demais)
 void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
-        Programa init) {
+        AlocID alocId, Programa init) {
     // Alocando as CPUs
     sis->numCPUs = numCPUs;
     sis->cpus = (CPU*) malloc(numCPUs * sizeof(CPU));
@@ -21,7 +21,7 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
         exit(64);
     }
     sis->tempo = 0;
-    memoriaInicia(&sis->mem);
+    memoriaInicia(&sis->mem, alocId);
     escalonadorInicia(&sis->esc, escId);
     tabelaProcessosInicia(&sis->tabela, &sis->mem);
     bloqueadosInicia(&sis->bloq);

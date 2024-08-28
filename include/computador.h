@@ -22,7 +22,7 @@ typedef struct {
 
 // Inicializa o computador
 void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
-        Programa init);
+        AlocID alocId, Programa init);
 
 // Executa próxima unidade de tempo, retornando um valor negativo caso não
 // hajam mais processos no sistema a serem executados

@@ -1,8 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
-#include "memoria.h"
 
+#include "memoria.h"
 
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
@@ -31,18 +32,11 @@ static uint16_t mascaraSeq(int n, int i) {
     return mascara;
 }
 
-void memoriaInicia(Memoria *mem) {
+void memoriaInicia(Memoria *mem, AlocID alocId) {
     memset(mem->conteudo, 0, TAMANHO_MEM * sizeof(uint8_t));
-    // Todas as páginas começam livres
-    mem->ocupadas = 0;
+    mem->ocupadas = 0; // todas as páginas começam livres
     mem->ultimaPos = 0;
-}
-
-// Aloca um vetor de n variáveis inteiras (4 bytes cada) na memória principal
-int32_t *memoriaAloca(Memoria *mem, int n) {
-
-    return firstfit(mem, n); // retorna função
-
+    mem->alocId = alocId;
 }
 
 // Desaloca um vetor de n variáveis inteiras (4 bytes cada) da memória
@@ -59,7 +53,8 @@ void memoriaLibera(Memoria *mem, int n, int32_t *fakePtr) {
     mem->ocupadas &= ~mascaraSeq(numPaginas, indicePagina);
 }
 
-int32_t *firstfit(Memoria *mem, int n){
+// First-fit: encaixa a alocação requisitada no primeiro espaço adequado
+static int32_t *firstfit(Memoria *mem, int n) {
     // se precisar alocar 0 espaços, não aloca
     if(n == 0) return NULL;
     int numPaginas = numPaginasVar(n);
@@ -91,19 +86,21 @@ int32_t *firstfit(Memoria *mem, int n){
     return NULL; // não foi possível alocar...
 }
 
-int32_t *nextfit(Memoria *mem, int n){
+// Next-fit: encaixa a alocação requisitada no primeiro espaço adequado a
+// partir da última alocação
+static int32_t *nextfit(Memoria *mem, int n) {
 
     if(n == 0) return NULL;
     int numPaginas = numPaginasVar(n);
-    
+
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
 
-    //variável usada para salvar o índice da primeira ocorrencia de 1
+    // Variável usada para salvar o índice da primeira ocorrencia de 1
     int primeiro1 = -1;
 
-    // verifica se há espaço para alocação da ultima posicao livre até
+    // verifica se há espaço para alocação da última posição livre até
     // o fim (next fit)
-    ocupadas <<= mem->ultimaPos;
+    ocupadas <<= mem->ultimaPos; // joga um monte de bits fora?
     for(int i = mem->ultimaPos; i > mem->ultimaPos-1; i = (i+1)%16) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
@@ -127,13 +124,13 @@ int32_t *nextfit(Memoria *mem, int n){
             mem->ultimaPos = primeiraLivre + numPaginas;
             return (int32_t *) acessaPagina(mem, primeiraLivre);
         }
-    
+
     }
 
     // se não há espaço e houve ocorrencia de 1, verifica espaços livres até essa
     // primeira ocorrencia
 
-    // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante 
+    // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante
     // é vazio e não é suficiente
     if(primeiro1 > 0) primeiro1 = 16;
 
@@ -168,17 +165,18 @@ int32_t *nextfit(Memoria *mem, int n){
             mem->ultimaPos = primeiraLivre + numPaginas;
             return (int32_t *) acessaPagina(mem, primeiraLivre);
         }
-    
+
     }
 
     return NULL; // não foi possível alocar...
 }
 
-int32_t *bestfit(Memoria *mem, int n){
+// Best-fit: encaixa a alocação requisitada no menor espaço adequado
+static int32_t *bestfit(Memoria *mem, int n) {
 
     if(n == 0) return NULL;
     int numPaginas = numPaginasVar(n);
-    
+
     int contaLivres = 0, melhorLugar = -1, ocupadas = mem->ocupadas, melhorEspaco = 17, lugarAtual=-1;
 
     for(int i = 0; i < 16; ++i) {
@@ -193,17 +191,17 @@ int32_t *bestfit(Memoria *mem, int n){
             if(lugarAtual < 0) lugarAtual = i;
         } else {
             // se encontra pagina ocupada verifica se é um espaço melhor
-            if (contaLivres>=numPaginas && contaLivres < melhorEspaco){
+            if (contaLivres>=numPaginas && contaLivres < melhorEspaco) {
                 melhorEspaco = contaLivres;
                 melhorLugar = lugarAtual;
             }
             lugarAtual = -1;
             contaLivres = 0;
         }
-        
+
     }
     // se chega no fim, verifica se é um espaço melhor
-    if(contaLivres>=numPaginas && contaLivres < melhorEspaco){
+    if(contaLivres >= numPaginas && contaLivres < melhorEspaco) {
         melhorEspaco = contaLivres;
         melhorLugar = lugarAtual;
     }
@@ -219,11 +217,12 @@ int32_t *bestfit(Memoria *mem, int n){
     return NULL; // não foi possível alocar...
 }
 
-int32_t *worstfit(Memoria *mem, int n){
+// Worst-fit: encaixa a alocação requisitada no maior espaço adequado
+static int32_t *worstfit(Memoria *mem, int n) {
 
     if(n == 0) return NULL;
     int numPaginas = numPaginasVar(n);
-    
+
     int contaLivres = 0, piorLugar = -1, ocupadas = mem->ocupadas, piorEspaco = numPaginas-1, lugarAtual=-1;
 
     for(int i = 0; i < 16; ++i) {
@@ -238,17 +237,17 @@ int32_t *worstfit(Memoria *mem, int n){
             if(lugarAtual < 0) lugarAtual = i;
         } else {
             // se encontra pagina ocupada verifica se é um espaço pior
-            if (contaLivres>=numPaginas && contaLivres > piorEspaco){
+            if (contaLivres >= numPaginas && contaLivres > piorEspaco) {
                 piorEspaco = contaLivres;
                 piorLugar = lugarAtual;
             }
             lugarAtual = -1;
             contaLivres = 0;
         }
-        
+
     }
     // se chega no fim, verifica se é um espaço pior
-    if(contaLivres>=numPaginas && contaLivres > piorEspaco){
+    if(contaLivres>=numPaginas && contaLivres > piorEspaco) {
         piorEspaco = contaLivres;
         piorLugar = lugarAtual;
     }
@@ -262,3 +261,17 @@ int32_t *worstfit(Memoria *mem, int n){
     }
     return NULL; // não foi possível alocar...
 }
+
+// Aloca um vetor de n variáveis inteiras (4 bytes cada) na memória principal
+int32_t *memoriaAloca(Memoria *mem, int n) {
+    switch(mem->alocId) {
+        case ALOC_FIRST_FIT: return firstfit(mem, n);
+        case ALOC_NEXT_FIT:  return nextfit(mem, n);
+        case ALOC_BEST_FIT:  return bestfit(mem, n);
+        case ALOC_WORST_FIT: return worstfit(mem, n);
+        default:
+            fprintf(stderr, "[!] Estratégia de alocação não reconhecida\n");
+            exit(65);
+    }
+}
+
