@@ -97,7 +97,58 @@ int32_t *nextfit(Memoria *mem, int n){
     int numPaginas = numPaginasVar(n);
     
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
-    for(int i = mem->ultimaPos; i < 16; i = (i+1)%16) {
+
+    //variável usada para salvar o índice da primeira ocorrencia de 1
+    int primeiro1 = -1;
+
+    // verifica se há espaço para alocação da ultima posicao livre até
+    // o fim (next fit)
+    ocupadas <<= mem->ultimaPos;
+    for(int i = mem->ultimaPos; i > mem->ultimaPos-1; i = (i+1)%16) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+        if(!paginaOcupada) {
+            ++contaLivres;
+            if(primeiraLivre < 0) primeiraLivre = i;
+        } else {
+            if(primeiro1 > 0) primeiro1 = i;
+            primeiraLivre = -1;
+            contaLivres = 0;
+        }
+        if(contaLivres == numPaginas) {
+            // Foi encontrada uma sequência de páginas livres adequada!
+            // Começa a partir da posição primeiraLivre. Essas páginas serão
+            // marcadas como ocupadas
+            mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
+            mem->ultimaPos = primeiraLivre + numPaginas;
+            return (int32_t *) acessaPagina(mem, primeiraLivre);
+        }
+    
+    }
+
+    // se não há espaço e houve ocorrencia de 1, verifica espaços livres até essa
+    // primeira ocorrencia
+
+    // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante 
+    // é vazio e não é suficiente
+    if(primeiro1 > 0) primeiro1 = 16;
+
+    // TODO: socorro dudu
+    // é necessário verificar tudo?
+    // da forma que o algorítmo funciona sim, mas podemos pensar em uma alteração
+    // em que atualiza o mem->ultimaPos quando se desalocar um valor, mas fugiria
+    // do algorítmo
+
+    // verifica se há espaços livres o suficiente de 0 até o primeiro 1 depois 
+    // da ultima posição livre
+    contaLivres = 0;
+    primeiraLivre = -1;
+    ocupadas = mem->ocupadas;
+    for(int i = 0; i < primeiro1; i++) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -116,9 +167,12 @@ int32_t *nextfit(Memoria *mem, int n){
             // Começa a partir da posição primeiraLivre. Essas páginas serão
             // marcadas como ocupadas
             mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
+            mem->ultimaPos = primeiraLivre + numPaginas;
             return (int32_t *) acessaPagina(mem, primeiraLivre);
         }
+    
     }
+
     return NULL; // não foi possível alocar...
 }
 
