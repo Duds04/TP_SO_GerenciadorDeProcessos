@@ -100,8 +100,9 @@ static int32_t *nextfit(Memoria *mem, int n) {
 
     // verifica se há espaço para alocação da última posição livre até
     // o fim (next fit)
-    ocupadas <<= mem->ultimaPos; // joga um monte de bits fora?
-    for(int i = mem->ultimaPos; i > mem->ultimaPos-1; i = (i+1)%16) {
+    // 
+    ocupadas >>= mem->ultimaPos;
+    for(int i = mem->ultimaPos; i < 16; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -112,7 +113,7 @@ static int32_t *nextfit(Memoria *mem, int n) {
             ++contaLivres;
             if(primeiraLivre < 0) primeiraLivre = i;
         } else {
-            if(primeiro1 > 0) primeiro1 = i;
+            if(primeiro1 < 0) primeiro1 = i;
             primeiraLivre = -1;
             contaLivres = 0;
         }
@@ -132,13 +133,7 @@ static int32_t *nextfit(Memoria *mem, int n) {
 
     // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante
     // é vazio e não é suficiente
-    if(primeiro1 > 0) primeiro1 = 16;
-
-    // TODO: socorro dudu
-    // é necessário verificar tudo?
-    // da forma que o algorítmo funciona sim, mas podemos pensar em uma alteração
-    // em que atualiza o mem->ultimaPos quando se desalocar um valor, mas fugiria
-    // do algorítmo
+    if(primeiro1 < 0) primeiro1 = 16;
 
     contaLivres = 0;
     primeiraLivre = -1;
