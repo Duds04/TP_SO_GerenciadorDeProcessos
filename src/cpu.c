@@ -6,28 +6,20 @@
 #include "instrucao.h"
 #include "tabela.h"
 #include "escalonamento.h"
+#include "computador.h"
 
 // Deixa a CPU zerada
 static void zeraCPU(CPU *cpu) {
-    cpu->tabela = NULL;
-    cpu->listaBloqueados = NULL;
-    cpu->esc = (Escalonador){ .id = (-1), .dados = NULL };
-
-    cpu->pidProcessoAtual = -1;
     cpu->pc = 0;
     cpu->quantum = 0;
-    cpu->reg = NULL;
-    cpu->numRegs = 0;
     cpu->codigo = NULL;
+    cpu->pidProcessoAtual = -1;
 }
 
 // Inicializa a CPU com referências à módulos externos necessários à sua operação
-void cpuInicia(CPU *cpu, TabelaProcessos *tab,
-        ListaBloqueados *listaBloqueados, Escalonador esc) {
+void cpuInicia(CPU *cpu, Computador *sis) {
     zeraCPU(cpu);
-    cpu->tabela = tab;
-    cpu->listaBloqueados = listaBloqueados;
-    cpu->esc = esc;
+    cpu->sis = sis;
 }
 
 // Checa se não há nenhum processo carregado
@@ -37,7 +29,7 @@ bool cpuEstaLivre(const CPU *cpu) {
 
 // Carrega um processo na CPU pelo ID, com quantum fixo
 void cpuCarregaProcesso(CPU *cpu, int pidProcessoAtual) {
-    Processo* processo = tabelaProcessosAcessa(cpu->tabela, pidProcessoAtual);
+    Processo *processo = tabelaProcessosAcessa(&cpu->sis->tabela, pidProcessoAtual);
     if(processo == NULL) {
         fprintf(stderr, "[!] Processo %d não encontrado\n", pidProcessoAtual);
         exit(1);
@@ -45,41 +37,34 @@ void cpuCarregaProcesso(CPU *cpu, int pidProcessoAtual) {
     processo->estado = EST_EXECUTANDO;
     cpu->pidProcessoAtual = pidProcessoAtual;
     cpu->pc = processo->pc;
-    cpu->quantum = escalonadorQuantum(cpu->esc, processo->prioridade);
-    cpu->reg = processo->reg;
-    cpu->numRegs = processo->codigo.numRegs;
+    cpu->quantum = escalonadorQuantum(cpu->sis->esc, processo->prioridade);
     cpu->codigo = &processo->codigo;
-}
-
-// Define o número de variáveis declaradas no processo (em tempo de execução,
-static int instrucaoN(CPU *cpu) {
-    return cpu->numRegs;
 }
 
 // Declaração de variáveis, (informando que existe a variável x)
 static void instrucaoD(int x, CPU *cpu) {
-    cpu->reg[x] = 0;
+    *computadorAcessa(cpu->sis, cpu->pidProcessoAtual, x) = 0;
 }
 // Atribuição de valor a variável
 static void instrucaoV(int x, int n, CPU *cpu){
-    cpu->reg[x] = n;
+    *computadorAcessa(cpu->sis, cpu->pidProcessoAtual, x) = n;
 }
  // Adição de um valor ao valor da variável
 static void instrucaoA(int x, int n, CPU *cpu){
-    cpu->reg[x] += n;
+    *computadorAcessa(cpu->sis, cpu->pidProcessoAtual, x) += n;
 }
 // Subtração de um valor ao valor da variável
 static void instrucaoS(int x, int n, CPU *cpu){
-     cpu->reg[x] -= n;
+    *computadorAcessa(cpu->sis, cpu->pidProcessoAtual, x) -= n;
 }
 // Bloqueio de processo por n unidades de tempo
 static void instrucaoB(int n, CPU *cpu) {
-    bloqueadosAdiciona(cpu->listaBloqueados, cpu->pidProcessoAtual, n);
-    tabelaProcessosAcessa(cpu->tabela, cpu->pidProcessoAtual)->estado = EST_BLOQUEADO;
+    bloqueadosAdiciona(&cpu->sis->bloq, cpu->pidProcessoAtual, n);
+    tabelaProcessosAcessa(&cpu->sis->tabela, cpu->pidProcessoAtual)->estado = EST_BLOQUEADO;
 }
 // Término de processo
 static void instrucaoT(CPU *cpu){
-    tabelaProcessoRemove(cpu->tabela, cpu->pidProcessoAtual);
+    tabelaProcessoRemove(&cpu->sis->tabela, cpu->pidProcessoAtual);
     cpu->pidProcessoAtual = -1;
 }
 
@@ -87,9 +72,9 @@ static void instrucaoT(CPU *cpu){
 static void instrucaoF(int n, CPU *cpu, int tempo) {
     Programa novoCodigo;
     programaCopia(cpu->codigo, &novoCodigo);
-    int id = tabelaProcessosAdiciona(cpu->tabela, cpu->pidProcessoAtual, cpu->pc + 1,
+    int id = tabelaProcessosAdiciona(&cpu->sis->tabela, cpu->pidProcessoAtual, cpu->pc + 1,
             novoCodigo, tempo);
-    escalonadorAdiciona(cpu->esc, tabelaProcessosAcessa(cpu->tabela, id));
+    escalonadorAdiciona(cpu->sis->esc, tabelaProcessosAcessa(&cpu->sis->tabela, id));
     cpu->pc += n;
 }
 
@@ -100,7 +85,7 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
         fprintf(stderr, "[!] Falha ao abrir o arquivo %s\n", nome_do_arquivo);
         exit(1);
     }
-    Processo* processo = tabelaProcessosAcessa(cpu->tabela, cpu->pidProcessoAtual);
+    Processo* processo = tabelaProcessosAcessa(&cpu->sis->tabela, cpu->pidProcessoAtual);
 
     Programa novoCodigo;
     programaInicia(&novoCodigo);
@@ -113,26 +98,26 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
 
 // Salva os dados do processo atual na tabela e o adiciona no escalonador
 static void salvaContexto(CPU *cpu) {
-    Processo *proc = tabelaProcessosAcessa(cpu->tabela, cpu->pidProcessoAtual);
+    Processo *proc = tabelaProcessosAcessa(&cpu->sis->tabela, cpu->pidProcessoAtual);
     if(proc == NULL) {
         fprintf(stderr, "[!] Processo %d não encontrado\n", cpu->pidProcessoAtual);
         exit(1);
     }
     proc->pc = cpu->pc;
-    escalonadorAdiciona(cpu->esc, proc);
+    escalonadorAdiciona(cpu->sis->esc, proc);
 }
 
 int cpuExecutaProximaInstrucao(CPU *cpu, int tempo) {
     if(cpuEstaLivre(cpu)) {
         // Se a CPU estiver vazia, carrega um processo do escalonador
-        int idProcessoAtual = escalonadorRemove(cpu->esc);
+        int idProcessoAtual = escalonadorRemove(cpu->sis->esc);
         if (idProcessoAtual < 0) return 1; // sem processos
         cpuCarregaProcesso(cpu, idProcessoAtual);
     } else if(cpu->quantum == 0) {
         // O quantum do processo atual acabou; novamente, um processo deve ser
         // carregado do escalonador
         salvaContexto(cpu);
-        int idProcessoAtual = escalonadorRemove(cpu->esc);
+        int idProcessoAtual = escalonadorRemove(cpu->sis->esc);
         if (idProcessoAtual < 0) {
             fprintf(stderr, "[!] Sem processos no escalonador\n");
             exit(0);
@@ -150,7 +135,7 @@ int cpuExecutaProximaInstrucao(CPU *cpu, int tempo) {
     printf("\n");
     switch(instrucao.op) {
         case 'N':
-            instrucaoN(cpu);
+            // Não faz nada
             break;
         case 'D':
             instrucaoD(instrucao.arg0, cpu);
@@ -190,6 +175,7 @@ void cpuImprime(const CPU *cpu, int numeroCPU, int tempo) {
     printf("TEMPO: %d\nQUANTUM: %d\n", tempo, cpu->quantum);
     printf("ID DO PROCESSO ATUAL: %d\nPC DO PROCESSO ATUAL: %d\n------------------\n", cpu->pidProcessoAtual, cpu->pc);
     printf("\nDADOS DO PROCESSO NA CPU #%d\n------------------\n", numeroCPU+1);
-    processoImprime(&cpu->tabela->processos[cpu->pidProcessoAtual]);
+    processoImprime(tabelaProcessosAcessa(&cpu->sis->tabela, cpu->pidProcessoAtual),
+            &cpu->sis->mem);
     printf("------------------\n\n");
 }

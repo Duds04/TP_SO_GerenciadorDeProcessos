@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "memoria.h"
 #include "programa.h"
 #include "processo.h"
 
 // Inicializa um novo processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        Programa codigo, int tempoInicio, int32_t *reg) {
+        int tempoInicio, Programa codigo, ProcessoPagInfo pags) {
     proc->id = id;
     proc->idPai = idPai;
     proc->pc = pc;
@@ -14,7 +15,7 @@ void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
     proc->estado = EST_PRONTO; // começa no estado pronto
     proc->codigo = codigo;
     proc->tempoInicio = tempoInicio;
-    proc->reg = reg;
+    proc->pags = pags;
 }
 
 // Impressão resumida dos dados do processo
@@ -24,7 +25,8 @@ void processoImprimeResumido(const Processo *proc) {
 }
 
 // Imprime os dados de um processo
-void processoImprime(const Processo *proc) {
+void processoImprime(const Processo *proc, const Memoria *mem) {
+    int32_t *reg = memoriaAcessa(mem, proc->pags);
     printf("ID: %03d PAI: %03d PRIORIDADE: %02d PC: %02d\n", proc->id,
             proc->idPai, proc->prioridade, proc->pc);
     printf("ESTADO: ");
@@ -45,7 +47,7 @@ void processoImprime(const Processo *proc) {
 
     printf("REGISTRADORES:\n-----------------\n");
     for(int r = 0; r < proc->codigo.numRegs; ++r)
-        printf("r%d: %d\n", r, proc->reg[r]);
+        printf("r%d: %d\n", r, reg[r]);
     printf("-----------------\n");
 
     printf("INSTRUÇÕES:\n-----------------\n");

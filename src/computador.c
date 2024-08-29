@@ -5,6 +5,8 @@
 
 #include "cpu.h"
 #include "memoria.h"
+#include "paginas.h"
+#include "processo.h"
 #include "tabela.h"
 #include "computador.h"
 #include "bloqueados.h"
@@ -32,7 +34,7 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
 
     // Inicializando as CPUs
     for(int i = 0; i < numCPUs; ++i)
-        cpuInicia(&sis->cpus[i], &sis->tabela, &sis->bloq, sis->esc);
+        cpuInicia(&sis->cpus[i], sis);
 }
 
 // Retorna o tempo médio de resposta de todos os processos
@@ -79,6 +81,17 @@ void computadorImprime(const Computador* sis) {
     bloqueadosImprime(&sis->bloq);
 }
 
+// Acessa uma posição de memória (variável inteira) relativa a um processo atual
+int32_t *computadorAcessa(Computador *sis, int pid, int i) {
+    Processo *proc = tabelaProcessosAcessa(&sis->tabela, pid);
+    if(proc == NULL) {
+        fprintf(stderr, "[!] Processo com ID %d não existe\n", pid);
+        exit(75);
+    }
+    return memoriaAcessaPagina(&sis->mem, proc->pags) + i;
+}
+
+// Desaloca a memória associada ao computador
 void computadorLibera(Computador* sis) {
     free(sis->cpus);
     sis->numCPUs = 0;

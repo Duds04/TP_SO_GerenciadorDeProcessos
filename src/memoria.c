@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "memoria.h"
+#include "paginas.h"
 
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
@@ -16,9 +17,15 @@ static inline int numPaginasVar(int n) {
     return teto(n * 4, TAMANHO_PAG);
 }
 
-// Retorna um ponteiro para a i-ésima página de memória
-static inline uint8_t *acessaPagina(Memoria *mem, int i) {
-    return &mem->conteudo[i * TAMANHO_PAG];
+// Retorna um ponteiro para a página de memória informada
+int32_t *memoriaAcessaPagina(Memoria *mem, ProcessoPagInfo pags) {
+    // TODO verificar aqui se a página está ou não no disco
+    return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
+}
+
+// Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
+int32_t *memoriaAcessa(const Memoria *mem, ProcessoPagInfo pags) {
+    return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
 }
 
 // Constrói uma máscara de 16 bits com uma sequência de n 1s a partir do
@@ -39,24 +46,19 @@ void memoriaInicia(Memoria *mem, AlocID alocId) {
     mem->alocId = alocId;
 }
 
-// Desaloca um vetor de n variáveis inteiras (4 bytes cada) da memória
-// principal, dado um ponteiro para sua localização
-void memoriaLibera(Memoria *mem, int n, int32_t *fakePtr) {
-    uint8_t *ptr = (uint8_t *) fakePtr;
-    if(ptr < mem->conteudo || ptr >= mem->conteudo + TAMANHO_MEM) {
-        fprintf(stderr, "[!] Função memoriaLibera recebeu um ponteiro inválido\n");
+// Desaloca uma sequência de páginas da memória (principal ou não)
+void memoriaLibera(Memoria *mem, ProcessoPagInfo pags) {
+    if(pags.paginaInicial < 0 || pags.numPaginas >= NUM_PAGINAS) {
+        fprintf(stderr, "[!] Informação de página inválida dada para memoriaLibera");
         return;
     }
-    int indice = ptr - mem->conteudo;
-    int indicePagina = indice / TAMANHO_PAG;
-    int numPaginas = numPaginasVar(n);
-    mem->ocupadas &= ~mascaraSeq(numPaginas, indicePagina);
+    mem->ocupadas &= ~mascaraSeq(pags.numPaginas, pags.paginaInicial);
 }
 
 // First-fit: encaixa a alocação requisitada no primeiro espaço adequado
-static int32_t *firstfit(Memoria *mem, int n) {
+static ProcessoPagInfo firstfit(Memoria *mem, int n) {
     // se precisar alocar 0 espaços, não aloca
-    if(n == 0) return NULL;
+    if(n == 0) return PAGINA_NULA;
     int numPaginas = numPaginasVar(n);
 
     // Encontra essa quantidade de páginas livres na memória. (first-fit)
@@ -80,17 +82,21 @@ static int32_t *firstfit(Memoria *mem, int n) {
             // Começa a partir da posição primeiraLivre. Essas páginas serão
             // marcadas como ocupadas
             mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
-            return (int32_t *) acessaPagina(mem, primeiraLivre);
+            ProcessoPagInfo pags = {
+                .paginaInicial = primeiraLivre,
+                .numPaginas = numPaginas,
+                .noDisco = false,
+            };
+            return pags;
         }
     }
-    return NULL; // não foi possível alocar...
+    return PAGINA_NULA; // não foi possível alocar...
 }
 
 // Next-fit: encaixa a alocação requisitada no primeiro espaço adequado a
 // partir da última alocação
-static int32_t *nextfit(Memoria *mem, int n) {
-
-    if(n == 0) return NULL;
+static ProcessoPagInfo nextfit(Memoria *mem, int n) {
+    if(n == 0) return PAGINA_NULA;
     int numPaginas = numPaginasVar(n);
 
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
@@ -100,7 +106,6 @@ static int32_t *nextfit(Memoria *mem, int n) {
 
     // verifica se há espaço para alocação da última posição livre até
     // o fim (next fit)
-    // 
     ocupadas >>= mem->ultimaPos;
     for(int i = mem->ultimaPos; i < 16; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
@@ -123,17 +128,21 @@ static int32_t *nextfit(Memoria *mem, int n) {
             // marcadas como ocupadas
             mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
             mem->ultimaPos = primeiraLivre + numPaginas;
-            return (int32_t *) acessaPagina(mem, primeiraLivre);
+            ProcessoPagInfo pags = {
+                .paginaInicial = primeiraLivre,
+                .numPaginas = numPaginas,
+                .noDisco = false,
+            };
+            return pags;
         }
 
     }
-
     // se não há espaço e houve ocorrencia de 1, verifica espaços livres até essa
     // primeira ocorrencia
 
     // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante
     // é vazio e não é suficiente
-    if(primeiro1 < 0) primeiro1 = 16;
+    if(primeiro1 > 0) primeiro1 = 16;
 
     contaLivres = 0;
     primeiraLivre = -1;
@@ -158,21 +167,24 @@ static int32_t *nextfit(Memoria *mem, int n) {
             // marcadas como ocupadas
             mem->ocupadas |= mascaraSeq(numPaginas, primeiraLivre);
             mem->ultimaPos = primeiraLivre + numPaginas;
-            return (int32_t *) acessaPagina(mem, primeiraLivre);
+            ProcessoPagInfo pags = {
+                .paginaInicial = primeiraLivre,
+                .numPaginas = numPaginas,
+                .noDisco = false,
+            };
+            return pags;
         }
-
     }
-
-    return NULL; // não foi possível alocar...
+    return PAGINA_NULA; // não foi possível alocar...
 }
 
 // Best-fit: encaixa a alocação requisitada no menor espaço adequado
-static int32_t *bestfit(Memoria *mem, int n) {
-
-    if(n == 0) return NULL;
+static ProcessoPagInfo bestfit(Memoria *mem, int n) {
+    if(n == 0) return PAGINA_NULA;
     int numPaginas = numPaginasVar(n);
 
-    int contaLivres = 0, melhorLugar = -1, ocupadas = mem->ocupadas, melhorEspaco = 17, lugarAtual=-1;
+    int melhorLugar = -1, melhorEspaco = 17;
+    int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
 
     for(int i = 0; i < 16; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
@@ -207,18 +219,23 @@ static int32_t *bestfit(Memoria *mem, int n) {
         // Começa a partir da posição melhorLugar. Essas páginas serão
         // marcadas como ocupadas
         mem->ocupadas |= mascaraSeq(numPaginas, melhorLugar);
-        return (int32_t *) acessaPagina(mem, melhorLugar);
+        ProcessoPagInfo pags = {
+            .paginaInicial = melhorLugar,
+            .numPaginas = numPaginas,
+            .noDisco = false,
+        };
+        return pags;
     }
-    return NULL; // não foi possível alocar...
+    return PAGINA_NULA; // não foi possível alocar...
 }
 
 // Worst-fit: encaixa a alocação requisitada no maior espaço adequado
-static int32_t *worstfit(Memoria *mem, int n) {
-
-    if(n == 0) return NULL;
+static ProcessoPagInfo worstfit(Memoria *mem, int n) {
+    if(n == 0) return PAGINA_NULA;
     int numPaginas = numPaginasVar(n);
 
-    int contaLivres = 0, piorLugar = -1, ocupadas = mem->ocupadas, piorEspaco = numPaginas-1, lugarAtual=-1;
+    int piorLugar = -1, piorEspaco = numPaginas - 1;
+    int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
 
     for(int i = 0; i < 16; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
@@ -252,13 +269,19 @@ static int32_t *worstfit(Memoria *mem, int n) {
         // Começa a partir da posição piorLugar. Essas páginas serão
         // marcadas como ocupadas
         mem->ocupadas |= mascaraSeq(numPaginas, piorLugar);
-        return (int32_t *) acessaPagina(mem, piorLugar);
+        ProcessoPagInfo pags = {
+            .paginaInicial = piorLugar,
+            .numPaginas = numPaginas,
+            .noDisco = false,
+        };
+        return pags;
     }
-    return NULL; // não foi possível alocar...
+    return PAGINA_NULA; // não foi possível alocar...
 }
 
-// Aloca um vetor de n variáveis inteiras (4 bytes cada) na memória principal
-int32_t *memoriaAloca(Memoria *mem, int n) {
+// Aloca uma sequência de páginas na memória principal que comporte n variáveis
+// inteiras. Assume que há espaço na memória principal para a alocação
+ProcessoPagInfo memoriaAloca(Memoria *mem, int n) {
     switch(mem->alocId) {
         case ALOC_FIRST_FIT: return firstfit(mem, n);
         case ALOC_NEXT_FIT:  return nextfit(mem, n);
@@ -269,4 +292,3 @@ int32_t *memoriaAloca(Memoria *mem, int n) {
             exit(65);
     }
 }
-

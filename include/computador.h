@@ -11,7 +11,7 @@
 #include "escalonamento.h"
 
 // Estrutura que representa um computador, com múltiplas CPUs
-typedef struct {
+typedef struct sis {
     CPU *cpus; int numCPUs; // múltiplas CPUs
     Memoria mem;            // memória principal
     TabelaProcessos tabela; // tabela de processos
@@ -33,6 +33,9 @@ double computadorTempoMedio(const Computador *sis);
 
 // Imprime os dados do computador
 void computadorImprime(const Computador *sis);
+
+// Acessa uma posição de memória (variável inteira) relativa a um processo atual
+int32_t *computadorAcessa(Computador *sis, int pid, int i);
 
 // Desaloca a memória associada ao computador
 void computadorLibera(Computador *sis);

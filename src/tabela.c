@@ -4,6 +4,7 @@
 
 #include "tabela.h"
 #include "memoria.h"
+#include "paginas.h"
 #include "processo.h"
 
 // Inicializa a tabela, conectando-a à memória
@@ -56,13 +57,13 @@ int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
         id = tab->ultimo;
         tab->ultimo++;
     }
-    int32_t *regs = memoriaAloca(tab->mem, codigo.numRegs);
-    if(regs == NULL) {
+    ProcessoPagInfo pags = memoriaAloca(tab->mem, codigo.numRegs);
+    if(pags.numPaginas < 0) {
         fprintf(stderr, "[!] Acabou a memória\n");
         exit(64);
     }
     int prioridade = (idPai < 0) ? 0 : tab->processos[idPai].prioridade;
-    processoInicia(&proc, id, idPai, pc, prioridade, codigo, tempoInicio, regs);
+    processoInicia(&proc, id, idPai, pc, prioridade, tempoInicio, codigo, pags);
     tab->processos[id] = proc;
     tab->contadorProcessos++;
     tab->contadorTodosProcessos++;
@@ -77,7 +78,7 @@ void tabelaProcessoRemove(TabelaProcessos *tab, int id) {
         return;
     }
     Processo *proc = &tab->processos[id];
-    memoriaLibera(tab->mem, proc->codigo.numRegs, proc->reg);
+    memoriaLibera(tab->mem, proc->pags);
     processoLibera(proc);
     proc->estado = EST_FINALIZADO;
     tab->contadorProcessos--;
@@ -95,7 +96,7 @@ void tabelaProcessosImprime(const TabelaProcessos *tab){
     printf("====================================\n");
     for(int i = 0; i < tab->ultimo; i++)
         if(tab->processos[i].estado != EST_FINALIZADO){
-            processoImprime(&tab->processos[i]);
+            processoImprime(&tab->processos[i], tab->mem);
             printf("====================================\n");
         }
 }

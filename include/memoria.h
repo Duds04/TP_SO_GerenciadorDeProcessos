@@ -2,6 +2,7 @@
 #define MEMORIA_H
 
 #include <stdint.h>
+#include "paginas.h"
 
 // Estratégias possíveis de alocação de memória
 typedef enum {
@@ -17,6 +18,7 @@ typedef enum {
 // de exatamente 16 bits para controle de páginas livres e ocupadas
 #define TAMANHO_MEM 4096
 #define TAMANHO_PAG  256
+#define NUM_PAGINAS (TAMANHO_MEM / TAMANHO_PAG)
 typedef uint16_t bitmap_t;
 
 // Memória principal, com metadados de gerência
@@ -29,11 +31,18 @@ typedef struct {
 
 void memoriaInicia(Memoria *mem, AlocID alocId);
 
-// Aloca um vetor de n variáveis inteiras (4 bytes cada) na memória principal
-int32_t *memoriaAloca(Memoria *mem, int n);
+// Aloca uma sequência de páginas na memória principal que comporte n variáveis
+// inteiras. Assume que há espaço na memória principal para a alocação
+ProcessoPagInfo memoriaAloca(Memoria *mem, int n);
 
-// Desaloca um vetor de n variáveis inteiras (4 bytes cada) da memória
-// principal, dado um ponteiro para sua localização
-void memoriaLibera(Memoria *mem, int n, int32_t *ptr);
+// Retorna um ponteiro para a página de memória informada, trazendo-a do disco
+// se for necessário
+int32_t *memoriaAcessaPagina(Memoria *mem, ProcessoPagInfo pags);
+
+// Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
+int32_t *memoriaAcessa(const Memoria *mem, ProcessoPagInfo pags);
+
+// Desaloca uma sequência de páginas da memória (principal ou não)
+void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 
 #endif // MEMORIA_H
