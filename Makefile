@@ -2,8 +2,8 @@ CFLAGS=-Wall -Wextra -ggdb -std=c11
 INCDIR=include
 
 controle: main.o gerencia.o processo.o tabela.o bloqueados.o fila.o cpu.o \
-	computador.o filasMultiplas.o escalonamento.o memoria.o programa.o \
-	instrucao.o
+	computador.o filasMultiplas.o escalonamento.o memoria.o programa.o    \
+	instrucao.o disco.o
 	$(CC) -o $@ $^
 
 main.o: src/main.c include/gerencia.h include/config.h
@@ -48,6 +48,9 @@ escalonamento.o: src/escalonamento.c include/escalonamento.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 memoria.o: src/memoria.c include/memoria.h
+	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
+
+disco.o: src/disco.c include/disco.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 .PHONY: clean
