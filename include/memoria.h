@@ -23,6 +23,7 @@ typedef uint16_t bitmap_t;
 
 // Memória principal, com metadados de gerência
 typedef struct {
+    ProcessoPagInfo *dono[NUM_PAGINAS];
     uint8_t conteudo[TAMANHO_MEM];
     bitmap_t ocupadas; // bitmap de controle de páginas livres
     int ultimaPos;     // índice da última alocação

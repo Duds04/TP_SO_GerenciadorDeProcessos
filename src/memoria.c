@@ -17,11 +17,6 @@ int numPaginasVar(int n) {
     return teto(n * 4, TAMANHO_PAG);
 }
 
-// Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
-int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags) {
-    return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
-}
-
 // Constrói uma máscara de 16 bits com uma sequência de n 1s a partir do
 // i-ésimo bit (inclusive), com 0s em todos os demais bits. Ambos os parâmetros
 // devem ser menores ou iguais a dezesseis e positivos! Assume que n >= 1
@@ -34,10 +29,17 @@ static uint16_t mascaraSeq(int n, int i) {
 }
 
 void memoriaInicia(Memoria *mem, AlocID alocId) {
+    for(int i = 0; i < NUM_PAGINAS; ++i)
+        mem->dono[i] = NULL;
     memset(mem->conteudo, 0, TAMANHO_MEM * sizeof(uint8_t));
     mem->ocupadas = 0; // todas as páginas começam livres
     mem->ultimaPos = 0;
     mem->alocId = alocId;
+}
+
+// Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
+int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags) {
+    return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
 }
 
 // Desaloca uma sequência de páginas da memória (principal ou não)
@@ -289,6 +291,7 @@ int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags) {
         // Paginação por demanda: devemos alocar uma nova sequência de páginas
         // quando ocorre uma falha de página como essa
         *pags = memoriaAloca(mem, pags->numPaginas);
+        mem->dono[pags->paginaInicial] = pags;
     }
     return (int32_t *) &mem->conteudo[pags->paginaInicial * TAMANHO_PAG];
 }
