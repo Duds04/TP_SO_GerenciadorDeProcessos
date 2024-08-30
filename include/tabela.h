@@ -6,7 +6,6 @@
 #include "programa.h"
 
 typedef struct {
-    Memoria *mem; // referência para a memória, para alocar p/ processos
     Processo *processos;
     int ultimo, tamanho;
     int contadorProcessos; // conta os processos atuais em memória
@@ -14,7 +13,7 @@ typedef struct {
 } TabelaProcessos;
 
 // Inicializa a tabela, conectando-a à memória
-void tabelaProcessosInicia(TabelaProcessos *tab, Memoria *mem);
+void tabelaProcessosInicia(TabelaProcessos *tab);
 
 // Adiciona um processo à tabela, retornando seu ID. O processo herda a
 // a prioridade do pai ou tem prioridade 0, caso não tenha pai
@@ -27,7 +26,7 @@ void tabelaProcessoRemove(TabelaProcessos *tab, int id);
 // Retorna um ponteiro para o processo dado seu ID
 Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id);
 
-void tabelaProcessosImprime(const TabelaProcessos *tab);
+void tabelaProcessosImprime(const TabelaProcessos *tab, const Memoria *mem);
 
 void tabelaProcessosLibera(TabelaProcessos *tab);
 

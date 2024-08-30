@@ -29,18 +29,18 @@ typedef struct {
     AlocID alocId;     // estratégia de alocação que deve ser utilizada
 } Memoria;
 
-void memoriaInicia(Memoria *mem, AlocID alocId);
+// Calcula o número de páginas a partir do número de variáveis inteiras,
+// assumindo que cada variável ocupa 4 bytes
+int numPaginasVar(int n);
 
-// Aloca uma sequência de páginas na memória principal que comporte n variáveis
-// inteiras. Assume que há espaço na memória principal para a alocação
-ProcessoPagInfo memoriaAloca(Memoria *mem, int n);
+void memoriaInicia(Memoria *mem, AlocID alocId);
 
 // Retorna um ponteiro para a página de memória informada, trazendo-a do disco
 // se for necessário
-int32_t *memoriaAcessaPagina(Memoria *mem, ProcessoPagInfo pags);
+int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags);
 
 // Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
-int32_t *memoriaAcessa(const Memoria *mem, ProcessoPagInfo pags);
+int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags);
 
 // Desaloca uma sequência de páginas da memória (principal ou não)
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);

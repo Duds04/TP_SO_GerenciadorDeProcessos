@@ -34,9 +34,6 @@ double computadorTempoMedio(const Computador *sis);
 // Imprime os dados do computador
 void computadorImprime(const Computador *sis);
 
-// Acessa uma posição de memória (variável inteira) relativa a um processo atual
-int32_t *computadorAcessa(Computador *sis, int pid, int i);
-
 // Desaloca a memória associada ao computador
 void computadorLibera(Computador *sis);
 

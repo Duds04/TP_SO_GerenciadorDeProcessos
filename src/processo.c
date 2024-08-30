@@ -2,12 +2,13 @@
 #include <stdlib.h>
 
 #include "memoria.h"
+#include "paginas.h"
 #include "programa.h"
 #include "processo.h"
 
 // Inicializa um novo processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        int tempoInicio, Programa codigo, ProcessoPagInfo pags) {
+        int tempoInicio, Programa codigo) {
     proc->id = id;
     proc->idPai = idPai;
     proc->pc = pc;
@@ -15,7 +16,11 @@ void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
     proc->estado = EST_PRONTO; // começa no estado pronto
     proc->codigo = codigo;
     proc->tempoInicio = tempoInicio;
-    proc->pags = pags;
+    proc->pags = (ProcessoPagInfo) {
+        .paginaInicial = -1, // não alocado ainda
+        .numPaginas = numPaginasVar(codigo.numRegs),
+        .noDisco = false,
+    };
 }
 
 // Impressão resumida dos dados do processo
@@ -26,7 +31,7 @@ void processoImprimeResumido(const Processo *proc) {
 
 // Imprime os dados de um processo
 void processoImprime(const Processo *proc, const Memoria *mem) {
-    int32_t *reg = memoriaAcessa(mem, proc->pags);
+    int32_t *reg = memoriaAcessaConst(mem, proc->pags);
     printf("ID: %03d PAI: %03d PRIORIDADE: %02d PC: %02d\n", proc->id,
             proc->idPai, proc->prioridade, proc->pc);
     printf("ESTADO: ");

@@ -5,14 +5,11 @@
 
 #include "cpu.h"
 #include "memoria.h"
-#include "paginas.h"
-#include "processo.h"
 #include "tabela.h"
 #include "computador.h"
 #include "bloqueados.h"
 #include "escalonamento.h"
 
-// Inicializa o computador (TODO refatorar isso, parâmetros demais)
 void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
         AlocID alocId, Programa init) {
     // Alocando as CPUs
@@ -25,7 +22,7 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
     sis->tempo = 0;
     memoriaInicia(&sis->mem, alocId);
     escalonadorInicia(&sis->esc, escId);
-    tabelaProcessosInicia(&sis->tabela, &sis->mem);
+    tabelaProcessosInicia(&sis->tabela);
     bloqueadosInicia(&sis->bloq);
 
     // Inserindo o programa inicial na tabela e no escalonamento
@@ -34,7 +31,8 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
 
     // Inicializando as CPUs
     for(int i = 0; i < numCPUs; ++i)
-        cpuInicia(&sis->cpus[i], sis);
+        cpuInicia(&sis->cpus[i], &sis->mem, &sis->tabela,
+                &sis->bloq, sis->esc);
 }
 
 // Retorna o tempo médio de resposta de todos os processos
@@ -75,20 +73,10 @@ void computadorImprime(const Computador* sis) {
     escalonadorImprime(sis->esc);
 
     printf("\n\tIMPRIMINDO DADOS DA TABELA DE PROCESSOS: \n");
-    tabelaProcessosImprime(&sis->tabela);
+    tabelaProcessosImprime(&sis->tabela, &sis->mem);
 
     printf("\n\tIMPRIMINDO DADOS DA LISTA DE BLOQUEADOS:\n");
     bloqueadosImprime(&sis->bloq);
-}
-
-// Acessa uma posição de memória (variável inteira) relativa a um processo atual
-int32_t *computadorAcessa(Computador *sis, int pid, int i) {
-    Processo *proc = tabelaProcessosAcessa(&sis->tabela, pid);
-    if(proc == NULL) {
-        fprintf(stderr, "[!] Processo com ID %d não existe\n", pid);
-        exit(75);
-    }
-    return memoriaAcessaPagina(&sis->mem, proc->pags) + i;
 }
 
 // Desaloca a memória associada ao computador

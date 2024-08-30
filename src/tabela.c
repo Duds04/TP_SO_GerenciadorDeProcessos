@@ -4,17 +4,15 @@
 
 #include "tabela.h"
 #include "memoria.h"
-#include "paginas.h"
 #include "processo.h"
 
 // Inicializa a tabela, conectando-a à memória
-void tabelaProcessosInicia(TabelaProcessos *tab, Memoria *mem) {
+void tabelaProcessosInicia(TabelaProcessos *tab) {
     Processo *listProcess = (Processo *) malloc(TAM_INIT * sizeof(Processo));
     if (listProcess == NULL) {
         fprintf(stderr, "[!] Erro ao alocar memória para a tabela de processos\n");
         exit(1);
     }
-    tab->mem = mem;
     tab->processos = listProcess;
     tab->tamanho = TAM_INIT;
     tab->ultimo = 0;
@@ -57,13 +55,8 @@ int tabelaProcessosAdiciona(TabelaProcessos *tab, int idPai, int pc,
         id = tab->ultimo;
         tab->ultimo++;
     }
-    ProcessoPagInfo pags = memoriaAloca(tab->mem, codigo.numRegs);
-    if(pags.numPaginas < 0) {
-        fprintf(stderr, "[!] Acabou a memória\n");
-        exit(64);
-    }
     int prioridade = (idPai < 0) ? 0 : tab->processos[idPai].prioridade;
-    processoInicia(&proc, id, idPai, pc, prioridade, tempoInicio, codigo, pags);
+    processoInicia(&proc, id, idPai, pc, prioridade, tempoInicio, codigo);
     tab->processos[id] = proc;
     tab->contadorProcessos++;
     tab->contadorTodosProcessos++;
@@ -78,7 +71,6 @@ void tabelaProcessoRemove(TabelaProcessos *tab, int id) {
         return;
     }
     Processo *proc = &tab->processos[id];
-    memoriaLibera(tab->mem, proc->pags);
     processoLibera(proc);
     proc->estado = EST_FINALIZADO;
     tab->contadorProcessos--;
@@ -90,13 +82,13 @@ Processo *tabelaProcessosAcessa(const TabelaProcessos *tab, int id) {
     return &tab->processos[id];
 }
 
-void tabelaProcessosImprime(const TabelaProcessos *tab){
+void tabelaProcessosImprime(const TabelaProcessos *tab, const Memoria *mem) {
     printf("Processos na tabela: %d\n", tab->contadorProcessos);
     printf("Memória alocada para %d processos\n", tab->tamanho);
     printf("====================================\n");
     for(int i = 0; i < tab->ultimo; i++)
         if(tab->processos[i].estado != EST_FINALIZADO){
-            processoImprime(&tab->processos[i], tab->mem);
+            processoImprime(&tab->processos[i], mem);
             printf("====================================\n");
         }
 }

@@ -13,18 +13,12 @@ static inline int teto(int a, int b) {
 
 // Calcula o número de páginas a partir do número de variáveis inteiras,
 // assumindo que cada variável ocupa 4 bytes
-static inline int numPaginasVar(int n) {
+int numPaginasVar(int n) {
     return teto(n * 4, TAMANHO_PAG);
 }
 
-// Retorna um ponteiro para a página de memória informada
-int32_t *memoriaAcessaPagina(Memoria *mem, ProcessoPagInfo pags) {
-    // TODO verificar aqui se a página está ou não no disco
-    return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
-}
-
 // Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
-int32_t *memoriaAcessa(const Memoria *mem, ProcessoPagInfo pags) {
+int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags) {
     return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
 }
 
@@ -56,10 +50,9 @@ void memoriaLibera(Memoria *mem, ProcessoPagInfo pags) {
 }
 
 // First-fit: encaixa a alocação requisitada no primeiro espaço adequado
-static ProcessoPagInfo firstfit(Memoria *mem, int n) {
+static ProcessoPagInfo firstfit(Memoria *mem, int numPaginas) {
     // se precisar alocar 0 espaços, não aloca
-    if(n == 0) return PAGINA_NULA;
-    int numPaginas = numPaginasVar(n);
+    if(numPaginas == 0) return PAGINA_NULA;
 
     // Encontra essa quantidade de páginas livres na memória. (first-fit)
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
@@ -95,9 +88,8 @@ static ProcessoPagInfo firstfit(Memoria *mem, int n) {
 
 // Next-fit: encaixa a alocação requisitada no primeiro espaço adequado a
 // partir da última alocação
-static ProcessoPagInfo nextfit(Memoria *mem, int n) {
-    if(n == 0) return PAGINA_NULA;
-    int numPaginas = numPaginasVar(n);
+static ProcessoPagInfo nextfit(Memoria *mem, int numPaginas) {
+    if(numPaginas == 0) return PAGINA_NULA;
 
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
 
@@ -179,9 +171,8 @@ static ProcessoPagInfo nextfit(Memoria *mem, int n) {
 }
 
 // Best-fit: encaixa a alocação requisitada no menor espaço adequado
-static ProcessoPagInfo bestfit(Memoria *mem, int n) {
-    if(n == 0) return PAGINA_NULA;
-    int numPaginas = numPaginasVar(n);
+static ProcessoPagInfo bestfit(Memoria *mem, int numPaginas) {
+    if(numPaginas == 0) return PAGINA_NULA;
 
     int melhorLugar = -1, melhorEspaco = 17;
     int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
@@ -230,9 +221,8 @@ static ProcessoPagInfo bestfit(Memoria *mem, int n) {
 }
 
 // Worst-fit: encaixa a alocação requisitada no maior espaço adequado
-static ProcessoPagInfo worstfit(Memoria *mem, int n) {
-    if(n == 0) return PAGINA_NULA;
-    int numPaginas = numPaginasVar(n);
+static ProcessoPagInfo worstfit(Memoria *mem, int numPaginas) {
+    if(numPaginas == 0) return PAGINA_NULA;
 
     int piorLugar = -1, piorEspaco = numPaginas - 1;
     int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
@@ -281,14 +271,24 @@ static ProcessoPagInfo worstfit(Memoria *mem, int n) {
 
 // Aloca uma sequência de páginas na memória principal que comporte n variáveis
 // inteiras. Assume que há espaço na memória principal para a alocação
-ProcessoPagInfo memoriaAloca(Memoria *mem, int n) {
+static ProcessoPagInfo memoriaAloca(Memoria *mem, int numPaginas) {
     switch(mem->alocId) {
-        case ALOC_FIRST_FIT: return firstfit(mem, n);
-        case ALOC_NEXT_FIT:  return nextfit(mem, n);
-        case ALOC_BEST_FIT:  return bestfit(mem, n);
-        case ALOC_WORST_FIT: return worstfit(mem, n);
+        case ALOC_FIRST_FIT: return firstfit(mem, numPaginas);
+        case ALOC_NEXT_FIT:  return nextfit(mem, numPaginas);
+        case ALOC_BEST_FIT:  return bestfit(mem, numPaginas);
+        case ALOC_WORST_FIT: return worstfit(mem, numPaginas);
         default:
             fprintf(stderr, "[!] Estratégia de alocação não reconhecida\n");
             exit(65);
     }
+}
+
+// Retorna um ponteiro para a página de memória informada
+int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags) {
+    if(pags->paginaInicial < 0) {
+        // Paginação por demanda: devemos alocar uma nova sequência de páginas
+        // quando ocorre uma falha de página como essa
+        *pags = memoriaAloca(mem, pags->numPaginas);
+    }
+    return (int32_t *) &mem->conteudo[pags->paginaInicial * TAMANHO_PAG];
 }

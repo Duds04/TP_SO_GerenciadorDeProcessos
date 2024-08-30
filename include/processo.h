@@ -27,7 +27,7 @@ typedef struct {
 
 // Inicializa um novo processo
 void processoInicia(Processo *proc, int id, int idPai, int pc, int prioridade,
-        int tempoInicio, Programa codigo, ProcessoPagInfo pags);
+        int tempoInicio, Programa codigo);
 
 // Impressão resumida dos dados do processo
 void processoImprimeResumido(const Processo *proc);
