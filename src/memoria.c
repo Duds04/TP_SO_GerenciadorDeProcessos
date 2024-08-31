@@ -321,13 +321,13 @@ void imprimeMemoria(const Memoria *mem){
     }
 }
 
-static void imprimePagina(int pg, const Memoria *mem){
+void imprimePagina(int pg, const Memoria *mem){
     for(int i = 8*pg; i< (8*pg+8); i++){
         printf("%d\n", mem->conteudo[i]);
     }
 }
 
-static void imprimeBitMap(bitmap_t bitmap){
+void imprimeBitMap(bitmap_t bitmap){
     int i, r;
      for(i = 16; i >= 0; i--) {
     // Executa a operação shift right até a última posição da direita para cada bit.

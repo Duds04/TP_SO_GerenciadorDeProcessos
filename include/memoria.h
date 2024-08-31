@@ -47,4 +47,8 @@ int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags);
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 
 void imprimeMemoria(const Memoria *mem);
+
+void imprimePagina(int pg, const Memoria *mem);
+
+void imprimeBitMap(bitmap_t bitmap);
 #endif // MEMORIA_H
