@@ -295,3 +295,49 @@ int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags) {
     }
     return (int32_t *) &mem->conteudo[pags->paginaInicial * TAMANHO_PAG];
 }
+
+void imprimeMemoria(const Memoria *mem){
+    printf("\tBitmap da memória:\n");
+    imprimeBitMap(mem->ocupadas);
+
+    printf("\tInformações de pagina dos processos\n");
+    for(int i = 0; i<NUM_PAGINAS; i++) {
+        int pgInicial = mem->dono[i]->paginaInicial;
+        int numPg = mem->dono[i]->numPaginas;
+
+        printf("Pagina inicial: %d\nNumero de paginas: %d\n",
+        pgInicial, numPg);
+
+        if(mem->dono[i]->noDisco){
+           printf("Em disco\n"); 
+        }else{
+            printf("Em memória\n");
+            for(int j = pgInicial; j<(pgInicial+numPg); j++){
+                printf("Pagina %d\n", i);
+                imprimePagina(i, mem);
+            }
+        }
+         
+    }
+}
+
+static void imprimePagina(int pg, const Memoria *mem){
+    for(int i = 8*pg; i< (8*pg+8); i++){
+        printf("%d\n", mem->conteudo[i]);
+    }
+}
+
+static void imprimeBitMap(bitmap_t bitmap){
+    int i, r;
+     for(i = 16; i >= 0; i--) {
+    // Executa a operação shift right até a última posição da direita para cada bit.
+    r = bitmap >> i;
+     if(r & 1) {
+        printf("1");
+     } else {
+        printf("0");
+     }
+ }
+
+ printf("\n");
+}

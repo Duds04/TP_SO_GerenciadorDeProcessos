@@ -46,4 +46,5 @@ int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags);
 // Desaloca uma sequência de páginas da memória (principal ou não)
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 
+void imprimeMemoria(const Memoria *mem);
 #endif // MEMORIA_H
