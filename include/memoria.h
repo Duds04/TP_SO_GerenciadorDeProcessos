@@ -43,6 +43,10 @@ int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags);
 // Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
 int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags);
 
+// Copia conteúdo de uma sequência de páginas para outra. Aloca caso seja
+// necessário
+void memoriaCopia(Memoria *mem, ProcessoPagInfo *dst, ProcessoPagInfo src);
+
 // Desaloca uma sequência de páginas da memória (principal ou não)
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 

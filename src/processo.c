@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "memoria.h"
 #include "paginas.h"
@@ -67,6 +66,11 @@ void processoLibera(Processo *proc) {
 }
 
 void processoSubstituiPrograma(Processo *proc, Programa codigo) {
-    fprintf(stderr, "[!] Substituição da imagem ainda não foi implementada!\n");
-    exit(1024);
+    processoLibera(proc);
+    proc->codigo = codigo;
+    proc->pc = 0;
+    // Processo perde a referência para suas páginas antigas, que devem
+    // ser liberadas externamente a essa função
+    proc->pags = PAGINA_NULA;
+    proc->pags.numPaginas = numPaginasVar(codigo.numRegs);
 }

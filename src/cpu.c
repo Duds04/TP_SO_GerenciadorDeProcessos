@@ -93,12 +93,15 @@ static void instrucaoF(int n, CPU *cpu, int tempo) {
     programaCopia(cpu->codigo, &novoCodigo);
     int id = tabelaProcessosAdiciona(cpu->tabela, cpu->pidProcessoAtual, cpu->pc + 1,
             novoCodigo, tempo);
-    escalonadorAdiciona(cpu->esc, tabelaProcessosAcessa(cpu->tabela, id));
+    Processo *proc = tabelaProcessosAcessa(cpu->tabela, id);
+    escalonadorAdiciona(cpu->esc, proc);
     cpu->pc += n;
+    // O novo processo precisa ter uma cópia das páginas do antigo processo
+    memoriaCopia(cpu->mem, &proc->pags, cpu->proc->pags);
 }
 
 // Substitui o programa de um processo
-static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
+static void instrucaoR(const char* nome_do_arquivo, CPU *cpu) {
     FILE* arquivo = fopen(nome_do_arquivo, "r");
     if(arquivo == NULL) {
         fprintf(stderr, "[!] Falha ao abrir o arquivo %s\n", nome_do_arquivo);
@@ -109,6 +112,8 @@ static void instrucaoR(const char* nome_do_arquivo, CPU *cpu){
     programaCarrega(&novoCodigo, arquivo);
     fclose(arquivo);
 
+    // Libera as páginas de memória associadas ao processo
+    memoriaLibera(cpu->mem, cpu->proc->pags);
     processoSubstituiPrograma(cpu->proc, novoCodigo);
     cpu->pc = 0;
 }

@@ -44,11 +44,13 @@ int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags) {
 
 // Desaloca uma sequência de páginas da memória (principal ou não)
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags) {
-    if(pags.paginaInicial < 0 || pags.numPaginas >= NUM_PAGINAS) {
-        fprintf(stderr, "[!] Informação de página inválida dada para memoriaLibera");
+    if(pags.paginaInicial < 0) return; // nada a liberar
+    if(pags.numPaginas >= NUM_PAGINAS) {
+        fprintf(stderr, "[!] Informação de página inválida dada para memoriaLibera\n");
         return;
     }
     mem->ocupadas &= ~mascaraSeq(pags.numPaginas, pags.paginaInicial);
+    mem->dono[pags.paginaInicial] = NULL;
 }
 
 // First-fit: encaixa a alocação requisitada no primeiro espaço adequado
@@ -274,15 +276,22 @@ static ProcessoPagInfo worstfit(Memoria *mem, int numPaginas) {
 // Aloca uma sequência de páginas na memória principal que comporte n variáveis
 // inteiras. Assume que há espaço na memória principal para a alocação
 static ProcessoPagInfo memoriaAloca(Memoria *mem, int numPaginas) {
+    if(numPaginas < 0) return PAGINA_NULA;
+    ProcessoPagInfo pags;
     switch(mem->alocId) {
-        case ALOC_FIRST_FIT: return firstfit(mem, numPaginas);
-        case ALOC_NEXT_FIT:  return nextfit(mem, numPaginas);
-        case ALOC_BEST_FIT:  return bestfit(mem, numPaginas);
-        case ALOC_WORST_FIT: return worstfit(mem, numPaginas);
+        case ALOC_FIRST_FIT: pags = firstfit(mem, numPaginas); break;
+        case ALOC_NEXT_FIT:  pags = nextfit(mem, numPaginas);  break;
+        case ALOC_BEST_FIT:  pags = bestfit(mem, numPaginas);  break;
+        case ALOC_WORST_FIT: pags = worstfit(mem, numPaginas); break;
         default:
             fprintf(stderr, "[!] Estratégia de alocação não reconhecida\n");
             exit(65);
     }
+    if(pags.paginaInicial < 0) {
+        fprintf(stderr, "[!] Sem memória principal suficiente\n");
+        exit(75);
+    }
+    return pags;
 }
 
 // Retorna um ponteiro para a página de memória informada
@@ -295,6 +304,16 @@ int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags) {
     }
     return (int32_t *) &mem->conteudo[pags->paginaInicial * TAMANHO_PAG];
 }
+
+// Copia conteúdo de uma sequência de páginas para outra. Aloca caso seja
+// necessário
+void memoriaCopia(Memoria *mem, ProcessoPagInfo *dst, ProcessoPagInfo src) {
+    if(src.paginaInicial < 0) return; // nada a copiar
+    dst->numPaginas = src.numPaginas;
+    memcpy(memoriaAcessa(mem, dst), memoriaAcessa(mem, &src),
+            src.numPaginas * TAMANHO_PAG);
+}
+
 
 void imprimeMemoria(const Memoria *mem){
     printf("\tBitmap da memória:\n");
@@ -309,7 +328,7 @@ void imprimeMemoria(const Memoria *mem){
         pgInicial, numPg);
 
         if(mem->dono[i]->noDisco){
-           printf("Em disco\n"); 
+           printf("Em disco\n");
         }else{
             printf("Em memória\n");
             for(int j = pgInicial; j<(pgInicial+numPg); j++){
@@ -317,7 +336,7 @@ void imprimeMemoria(const Memoria *mem){
                 imprimePagina(i, mem);
             }
         }
-         
+
     }
 }
 
