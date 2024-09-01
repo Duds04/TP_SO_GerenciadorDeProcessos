@@ -3,7 +3,7 @@ INCDIR=include
 
 controle: main.o gerencia.o processo.o tabela.o bloqueados.o fila.o cpu.o \
 	computador.o filasMultiplas.o escalonamento.o memoria.o programa.o    \
-	instrucao.o disco.o
+	instrucao.o disco.o desempenho.o
 	$(CC) -o $@ $^
 
 main.o: src/main.c include/gerencia.h include/config.h
@@ -51,6 +51,9 @@ memoria.o: src/memoria.c include/memoria.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 disco.o: src/disco.c include/disco.h
+	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
+
+desempenho.o: src/desempenho.c include/desempenho.h
 	$(CC) -c -o $@ -I $(INCDIR) $(CFLAGS) $<
 
 .PHONY: clean
