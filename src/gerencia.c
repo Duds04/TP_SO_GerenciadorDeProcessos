@@ -63,12 +63,15 @@ void gerencia(int controle_fd, Config conf) {
                 case 'M':
                     printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
                     imprimeMediaFragmentosExternos(&sis.mem);
+                    imprimeMediaNosPercorridos(&sis.mem);
                     printf("Saindo...\n");
                     ok = false;
                     break;
                 case 'U':
                     if(computadorExecuta(&sis) < 0) {
                         printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
+                        imprimeMediaFragmentosExternos(&sis.mem);
+                        imprimeMediaNosPercorridos(&sis.mem);
                         printf("Acabaram os processos em memória, finalizando programa...\n");
                         ok = false;
                     }

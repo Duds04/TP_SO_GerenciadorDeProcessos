@@ -27,6 +27,7 @@ typedef struct {
     uint8_t conteudo[TAMANHO_MEM];
     bitmap_t ocupadas; // bitmap de controle de páginas livres
     int somaFragmentosExternos;    // número de todos os fragmentos externos a cada operação
+    int somaNosPercorridos;       // número de nós percorridos em todas as operações
     int numOperacoes; // número de operações de alocação e desalocação
     int ultimaPos;     // índice da última alocação
     AlocID alocId;     // estratégia de alocação que deve ser utilizada
@@ -62,5 +63,7 @@ void imprimePagina(int pg, const Memoria *mem);
 void imprimeBitMap(bitmap_t bitmap);
 
 void imprimeMediaFragmentosExternos(const Memoria *mem);
+
+void imprimeMediaNosPercorridos(const Memoria *mem);
 
 #endif // MEMORIA_H
