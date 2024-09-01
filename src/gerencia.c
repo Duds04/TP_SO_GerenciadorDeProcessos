@@ -10,6 +10,7 @@
 #include "gerencia.h"
 #include "computador.h"
 #include "programa.h"
+#include "desempenho.h"
 
 #define BUF_MAX 64
 
@@ -53,7 +54,6 @@ void gerencia(int controle_fd, Config conf) {
     // Inicializa o sistema com o processo inicial
     Computador sis;
     computadorInicia(&sis, conf.numCpus, conf.escId, conf.alocId, programaInit);
-
     bool ok = true;
     char buf[BUF_MAX];
     while(ok) {

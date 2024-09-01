@@ -5,6 +5,7 @@
 
 #include "memoria.h"
 #include "paginas.h"
+#include "desempenho.h"
 
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
