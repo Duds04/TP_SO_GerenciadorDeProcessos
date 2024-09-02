@@ -35,6 +35,9 @@ void memoriaInicia(Memoria *mem, AlocID alocId) {
     mem->ocupadas = 0; // todas as páginas começam livres
     mem->ultimaPos = 0;
     mem->alocId = alocId;
+    mem->somaFragmentosExternos = 0;
+    mem->numOperacoes = 0;
+
 }
 
 // Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
@@ -53,6 +56,9 @@ void memoriaLibera(Memoria *mem, ProcessoPagInfo pags) {
     }
     mem->ocupadas &= ~mascaraSeq(pags.numPaginas, pags.paginaInicial);
     mem->dono[pags.paginaInicial] = NULL;
+    
+    mem->somaFragmentosExternos += memoriaFragmentosExternos(mem);
+    mem->numOperacoes += 1;
 }
 
 // First-fit: encaixa a alocação requisitada no primeiro espaço adequado
@@ -69,6 +75,8 @@ static ProcessoPagInfo firstfit(Memoria *mem, int numPaginas) {
         // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
         int paginaOcupada = ocupadas & 1;
         ocupadas >>= 1;
+        mem->somaNosPercorridos ++;
+
         if(!paginaOcupada) {
             ++contaLivres;
             if(primeiraLivre < 0) primeiraLivre = i;
@@ -112,6 +120,8 @@ static ProcessoPagInfo nextfit(Memoria *mem, int numPaginas) {
         // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
         int paginaOcupada = ocupadas & 1;
         ocupadas >>= 1;
+        mem->somaNosPercorridos ++;
+
         if(!paginaOcupada) {
             ++contaLivres;
             if(primeiraLivre < 0) primeiraLivre = i;
@@ -152,6 +162,7 @@ static ProcessoPagInfo nextfit(Memoria *mem, int numPaginas) {
         // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
         int paginaOcupada = ocupadas & 1;
         ocupadas >>= 1;
+        mem->somaNosPercorridos ++;
         if(!paginaOcupada) {
             ++contaLivres;
             if(primeiraLivre < 0) primeiraLivre = i;
@@ -190,6 +201,7 @@ static ProcessoPagInfo bestfit(Memoria *mem, int numPaginas) {
         // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
         int paginaOcupada = ocupadas & 1;
         ocupadas >>= 1;
+        mem->somaNosPercorridos ++;
         if(!paginaOcupada) {
             ++contaLivres;
             if(lugarAtual < 0) lugarAtual = i;
@@ -240,6 +252,7 @@ static ProcessoPagInfo worstfit(Memoria *mem, int numPaginas) {
         // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
         int paginaOcupada = ocupadas & 1;
         ocupadas >>= 1;
+        mem->somaNosPercorridos ++;
         if(!paginaOcupada) {
             ++contaLivres;
             if(lugarAtual < 0) lugarAtual = i;
@@ -293,6 +306,10 @@ static ProcessoPagInfo memoriaAloca(Memoria *mem, int numPaginas) {
         fprintf(stderr, "[!] Sem memória principal suficiente\n");
         exit(75);
     }
+
+    mem->somaFragmentosExternos += memoriaFragmentosExternos(mem);
+    mem->numOperacoes ++;
+
     return pags;
 }
 
@@ -304,6 +321,7 @@ int32_t *memoriaAcessa(Memoria *mem, ProcessoPagInfo *pags) {
         *pags = memoriaAloca(mem, pags->numPaginas);
         mem->dono[pags->paginaInicial] = pags;
     }
+    
     return (int32_t *) &mem->conteudo[pags->paginaInicial * TAMANHO_PAG];
 }
 
@@ -328,6 +346,64 @@ static void imprimePagina(int pg, const Memoria *mem) {
     }
 }
 
+int memoriaFragmentosExternos(const Memoria *mem) {
+    int fragmentos = 0;
+    int contaLivres = 0, ocupadas = mem->ocupadas;
+
+    for(int i = 0; i < 16; ++i) {
+        // Percorre o bitmap bit a bit, armazenando o valor de cada um em
+        // paginaOcupada. Bit ligado => página correspondente não está livre
+
+        // ele ta literalmente fazendo isso paginaOcupada = ocupadas[i]
+        int paginaOcupada = ocupadas & 1;
+        ocupadas >>= 1;
+
+        if (i == 0 && paginaOcupada) {
+            ++fragmentos;
+        }
+
+        if(paginaOcupada) {
+            if(contaLivres > 0) 
+                ++fragmentos;
+            contaLivres = 0;
+        } 
+        
+        else 
+            ++contaLivres;
+        
+    }
+    return fragmentos;
+}
+
+
+void imprimeMemoria(const Memoria *mem){
+    printf("\tBitmap da memória:\n");
+    imprimeBitMap(mem->ocupadas);
+    printf("Número de fragmentos externos: %d\n", memoriaFragmentosExternos(mem));
+
+    printf("\tInformações de pagina dos processos\n");
+    for(int i = 0; i<NUM_PAGINAS; i++) {
+        int pgInicial = mem->dono[i]->paginaInicial;
+        int numPg = mem->dono[i]->numPaginas;
+
+        printf("Pagina inicial: %d\nNumero de paginas: %d\n",
+        pgInicial, numPg);
+
+        if(mem->dono[i]->noDisco){
+           printf("Em disco\n");
+        }
+        else{
+            printf("Em memória\n");
+            for(int j = pgInicial; j<(pgInicial+numPg); j++){
+                printf("Pagina %d\n", i);
+                imprimePagina(i, mem);
+                fflush(stdout);
+            }
+        }
+        
+    }
+}
+
 static void imprimeBitMap(bitmap_t bitmap){
     int i, r;
     for(i = NUM_PAGINAS; i >= 0; i--) {
@@ -343,6 +419,8 @@ static void imprimeBitMap(bitmap_t bitmap){
 void memoriaImprime(const Memoria *mem){
     printf("\tBitmap da memória: ");
     imprimeBitMap(mem->ocupadas);
+    printf("Número de fragmentos externos: %d\n", memoriaFragmentosExternos(mem));
+
     for(int i = 0; i < NUM_PAGINAS; ++i) {
         if(mem->dono[i] == NULL) continue;
         int numPaginas = mem->dono[i]->numPaginas;
@@ -352,5 +430,23 @@ void memoriaImprime(const Memoria *mem){
             imprimePagina(i + p, mem);
         }
         printf("\n");
+    }
+}
+
+void imprimeMediaFragmentosExternos(const Memoria *mem) {
+    if(mem->numOperacoes == 0) {
+        printf("Nenhuma operação de alocação/desalocação foi realizada.\n");
+    } else {
+        double mediaFragmentosExternos = (double)mem->somaFragmentosExternos / mem->numOperacoes;
+        printf("Número médio de fragmentos externos: %.2f\n", mediaFragmentosExternos);
+    }
+}
+
+void imprimeMediaNosPercorridos(const Memoria *mem) {
+    if (mem->numOperacoes == 0) {
+        printf("Nenhuma operação de alocação/desalocação foi realizada.\n");
+    } else {
+        double mediaNosPercorridos = (double)mem->somaNosPercorridos / mem->numOperacoes;
+        printf("Número médio de nós percorridos: %.2f\n", mediaNosPercorridos);
     }
 }

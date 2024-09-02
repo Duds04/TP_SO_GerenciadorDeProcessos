@@ -40,7 +40,7 @@ void gerencia(int controle_fd, Config conf) {
     // (o filho herda tudo do pai inclusive o tratador)
     signal(SIGCHLD, SIG_DFL);
 
-    FILE *init = fopen("./init", "r");
+    FILE *init = fopen("./resources/prog1", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pôde ser aberto\n");
         return;
@@ -62,15 +62,20 @@ void gerencia(int controle_fd, Config conf) {
             switch(buf[i]) {
                 case 'M':
                     printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
+                    imprimeMediaFragmentosExternos(&sis.mem);
+                    imprimeMediaNosPercorridos(&sis.mem);
                     printf("Saindo...\n");
                     ok = false;
                     break;
                 case 'U':
                     if(computadorExecuta(&sis) < 0) {
                         printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
+                        imprimeMediaFragmentosExternos(&sis.mem);
+                        imprimeMediaNosPercorridos(&sis.mem);
                         printf("Acabaram os processos em memória, finalizando programa...\n");
                         ok = false;
                     }
+                    
                     break;
                 case 'I':
                     processoImpressao(&sis);

@@ -26,8 +26,12 @@ typedef struct {
     ProcessoPagInfo *dono[NUM_PAGINAS];
     uint8_t conteudo[TAMANHO_MEM];
     bitmap_t ocupadas; // bitmap de controle de páginas livres
+    int somaFragmentosExternos;    // número de todos os fragmentos externos a cada operação
+    int somaNosPercorridos;       // número de nós percorridos em todas as operações
+    int numOperacoes; // número de operações de alocação e desalocação
     int ultimaPos;     // índice da última alocação
     AlocID alocId;     // estratégia de alocação que deve ser utilizada
+    
 } Memoria;
 
 // Calcula o número de páginas a partir do número de variáveis inteiras,
@@ -52,5 +56,20 @@ void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 
 // Imprime informações sobre a memória
 void memoriaImprime(const Memoria *mem);
+
+// conta o número de fragmentos externos na memória
+int memoriaFragmentosExternos(const Memoria *mem);
+
+// Imprime informações sobre a paginação
+void imprimePagina(int pg, const Memoria *mem);
+
+// Imprime o bitmap de páginas
+void imprimeBitMap(bitmap_t bitmap);
+
+// Imprime a média de fragmentos externos
+void imprimeMediaFragmentosExternos(const Memoria *mem);
+
+// Imprime a média de nós percorridos
+void imprimeMediaNosPercorridos(const Memoria *mem);
 
 #endif // MEMORIA_H
