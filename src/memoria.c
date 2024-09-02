@@ -5,7 +5,6 @@
 
 #include "memoria.h"
 #include "paginas.h"
-#include "desempenho.h"
 
 // Teto da divisão inteira
 static inline int teto(int a, int b) {
@@ -24,7 +23,7 @@ int numPaginasVar(int n) {
 static uint16_t mascaraSeq(int n, int i) {
     uint16_t mascara = 1;
     for(int b = 0; b < n - 1; ++b)
-        mascara = (mascara << 1) & 1;
+        mascara = (mascara << 1) | 1;
     mascara <<= i;
     return mascara;
 }
