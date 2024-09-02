@@ -40,7 +40,7 @@ void gerencia(int controle_fd, Config conf) {
     // (o filho herda tudo do pai inclusive o tratador)
     signal(SIGCHLD, SIG_DFL);
 
-    FILE *init = fopen("./resources/prog1", "r");
+    FILE *init = fopen("init", "r");
     if(init == NULL) {
         fprintf(stderr, "[!] Arquivo init não pôde ser aberto\n");
         return;

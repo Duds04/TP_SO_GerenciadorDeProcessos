@@ -335,17 +335,6 @@ void memoriaCopia(Memoria *mem, ProcessoPagInfo *dst, ProcessoPagInfo src) {
             src.numPaginas * TAMANHO_PAG);
 }
 
-static void imprimePagina(int pg, const Memoria *mem) {
-    const int linhas = 8;
-    int32_t *pag = (int32_t *) &mem->conteudo[pg * TAMANHO_PAG];
-    int varPorLinha = TAMANHO_PAG / (4 * linhas);
-    for(int i = 0; i < linhas; ++i) {
-        printf("%4d", pag[i * linhas]);
-        for(int j = 1; j < varPorLinha; ++j)
-            printf(" %4d ", pag[i * linhas + j]);
-        printf("\n");
-    }
-}
 
 int memoriaFragmentosExternos(const Memoria *mem) {
     int fragmentos = 0;
@@ -376,32 +365,15 @@ int memoriaFragmentosExternos(const Memoria *mem) {
     return fragmentos;
 }
 
-
-void imprimeMemoria(const Memoria *mem){
-    printf("\tBitmap da memória:\n");
-    imprimeBitMap(mem->ocupadas);
-    printf("Número de fragmentos externos: %d\n", memoriaFragmentosExternos(mem));
-
-    printf("\tInformações de pagina dos processos\n");
-    for(int i = 0; i<NUM_PAGINAS; i++) {
-        int pgInicial = mem->dono[i]->paginaInicial;
-        int numPg = mem->dono[i]->numPaginas;
-
-        printf("Pagina inicial: %d\nNumero de paginas: %d\n",
-        pgInicial, numPg);
-
-        if(mem->dono[i]->noDisco){
-           printf("Em disco\n");
-        }
-        else{
-            printf("Em memória\n");
-            for(int j = pgInicial; j<(pgInicial+numPg); j++){
-                printf("Pagina %d\n", i);
-                imprimePagina(i, mem);
-                fflush(stdout);
-            }
-        }
-        
+static void imprimePagina(int pg, const Memoria *mem) {
+    const int linhas = 8;
+    int32_t *pag = (int32_t *) &mem->conteudo[pg * TAMANHO_PAG];
+    int varPorLinha = TAMANHO_PAG / (4 * linhas);
+    for(int i = 0; i < linhas; ++i) {
+        printf("%4d", pag[i * linhas]);
+        for(int j = 1; j < varPorLinha; ++j)
+            printf(" %4d ", pag[i * linhas + j]);
+        printf("\n");
     }
 }
 
