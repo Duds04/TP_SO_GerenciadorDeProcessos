@@ -341,26 +341,16 @@ static void imprimeBitMap(bitmap_t bitmap){
 }
 
 void memoriaImprime(const Memoria *mem){
-    printf("\tBitmap da memória:\n");
+    printf("\tBitmap da memória: ");
     imprimeBitMap(mem->ocupadas);
-
-    printf("\tInformações de pagina dos processos\n");
-    for(int i = 0; i < NUM_PAGINAS; i++) {
-        int pgInicial = mem->dono[i]->paginaInicial;
-        int numPg = mem->dono[i]->numPaginas;
-
-        printf("Pagina inicial: %d\nNumero de paginas: %d\n",
-                pgInicial, numPg);
-
-        if(mem->dono[i]->noDisco) {
-            printf("Em disco\n");
-        } else {
-            printf("Em memória\n");
-            for(int j = pgInicial; j < pgInicial + numPg; j++){
-                printf("Pagina %d\n", i);
-                imprimePagina(i, mem);
-            }
+    for(int i = 0; i < NUM_PAGINAS; ++i) {
+        if(mem->dono[i] == NULL) continue;
+        int numPaginas = mem->dono[i]->numPaginas;
+        printf("\tAlocação iniciada na página #%d\n", i);
+        for(int p = 0; p < numPaginas; ++p) {
+            printf("Página #%d:\n", i + p);
+            imprimePagina(i + p, mem);
         }
-
+        printf("\n");
     }
 }
