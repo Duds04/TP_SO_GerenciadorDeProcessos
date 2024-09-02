@@ -19,6 +19,7 @@ void discoInicia(Disco *disco) {
     disco->conteudo = (uint8_t **) safeAlloc(DISCO_INICIAL * sizeof(uint8_t *));
     disco->capacidade = DISCO_INICIAL;
     disco->tamanho = 0;
+    disco->numUtilizado = 0;
 }
 
 // Transfere uma sequência de páginas para o disco dado seu tamanho em bytes,
@@ -46,6 +47,8 @@ int discoTransfere(Disco *disco, const uint8_t pags[], int len) {
     }
     disco->conteudo[addr] = safeAlloc(len * sizeof(uint8_t));
     memcpy(disco->conteudo[addr], pags, len * sizeof(uint8_t));
+    disco->numUtilizado++;
+
     return addr;
 }
 
@@ -57,11 +60,25 @@ void discoRetira(Disco *disco, int addr, uint8_t vec[], int len) {
     }
     memcpy(vec, disco->conteudo[addr], len * sizeof(uint8_t));
     free(disco->conteudo[addr]);
-    disco->conteudo = NULL;
+    disco->conteudo[addr] = NULL;
+
 }
 
 void discoLibera(Disco *disco) {
     for(int i = 0; i < disco->tamanho; ++i)
         free(disco->conteudo[i]);
     free(disco->conteudo);
+}
+
+void discoImprime(const Disco *disco){
+
+    printf("O disco foi usado %d vezes\n", disco->numUtilizado);
+    printf("O disco tem %d páginas\n", disco->tamanho);
+
+    for(int i = 0; i < disco->tamanho; ++i) {
+        if(disco->conteudo[i] == NULL)
+            printf("  [%d] NULL\n", i);
+        else
+            printf("  [%d] %p\n", i, (void *) disco->conteudo[i]);
+    }
 }

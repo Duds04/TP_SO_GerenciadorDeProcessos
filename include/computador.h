@@ -9,6 +9,7 @@
 #include "memoria.h"
 #include "bloqueados.h"
 #include "escalonamento.h"
+#include "disco.h"
 
 // Estrutura que representa um computador, com múltiplas CPUs
 typedef struct sis {
@@ -18,6 +19,7 @@ typedef struct sis {
     ListaBloqueados bloq;   // estrutura de controle de processos bloqueados
     Escalonador esc;        // algoritmo de escalonamento
     int tempo;              // contador de tempo (em unidades)
+    Disco disco;            // disco para liberação de espaço
 } Computador;
 
 // Inicializa o computador

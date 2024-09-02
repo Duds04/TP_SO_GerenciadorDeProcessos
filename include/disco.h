@@ -12,6 +12,7 @@ typedef struct {
     uint8_t **conteudo;
     int capacidade;
     int tamanho;
+    int numUtilizado;
 } Disco;
 
 void discoInicia(Disco *disco);
@@ -23,6 +24,10 @@ int discoTransfere(Disco *disco, const uint8_t pags[], int len);
 // Retira uma sequência de páginas do disco para um vetor
 void discoRetira(Disco *disco, int addr, uint8_t vec[], int len);
 
+// Libera uma região de memória no disco
 void discoLibera(Disco *disco);
+
+// Imprime informações sobre o disco
+void discoImprime(const Disco *disco);
 
 #endif // DISCO_H

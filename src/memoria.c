@@ -37,6 +37,7 @@ void memoriaInicia(Memoria *mem, AlocID alocId) {
     mem->alocId = alocId;
     mem->somaFragmentosExternos = 0;
     mem->numOperacoes = 0;
+    mem->somaNosPercorridos = 0;
 
 }
 

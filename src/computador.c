@@ -24,6 +24,7 @@ void computadorInicia(Computador *sis, int numCPUs, EscalonamentoID escId,
     escalonadorInicia(&sis->esc, escId);
     tabelaProcessosInicia(&sis->tabela);
     bloqueadosInicia(&sis->bloq);
+    discoInicia(&sis->disco);
 
     // Inserindo o programa inicial na tabela e no escalonamento
     int id = tabelaProcessosAdiciona(&sis->tabela, -1, 0, init, 0);

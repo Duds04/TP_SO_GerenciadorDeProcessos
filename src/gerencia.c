@@ -64,6 +64,7 @@ void gerencia(int controle_fd, Config conf) {
                     printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
                     imprimeMediaFragmentosExternos(&sis.mem);
                     imprimeMediaNosPercorridos(&sis.mem);
+                    discoImprime(&sis.disco);
                     printf("Saindo...\n");
                     ok = false;
                     break;
@@ -72,6 +73,7 @@ void gerencia(int controle_fd, Config conf) {
                         printf("Tempo médio de resposta: %g\n", computadorTempoMedio(&sis));
                         imprimeMediaFragmentosExternos(&sis.mem);
                         imprimeMediaNosPercorridos(&sis.mem);
+                        discoImprime(&sis.disco);
                         printf("Acabaram os processos em memória, finalizando programa...\n");
                         ok = false;
                     }

@@ -61,10 +61,10 @@ void memoriaImprime(const Memoria *mem);
 int memoriaFragmentosExternos(const Memoria *mem);
 
 // Imprime informações sobre a paginação
-void imprimePagina(int pg, const Memoria *mem);
+static void imprimePagina(int pg, const Memoria *mem);
 
 // Imprime o bitmap de páginas
-void imprimeBitMap(bitmap_t bitmap);
+static void imprimeBitMap(bitmap_t bitmap);
 
 // Imprime a média de fragmentos externos
 void imprimeMediaFragmentosExternos(const Memoria *mem);
