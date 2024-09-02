@@ -39,6 +39,8 @@ void memoriaInicia(Memoria *mem, AlocID alocId) {
 
 // Retorna um ponteiro para a página de memória informada, esteja ela no disco ou não
 int32_t *memoriaAcessaConst(const Memoria *mem, ProcessoPagInfo pags) {
+    if(pags.paginaInicial < 0 || pags.numPaginas < 0
+            || pags.numPaginas >= NUM_PAGINAS) return NULL;
     return (int32_t *) &mem->conteudo[pags.paginaInicial * TAMANHO_PAG];
 }
 
@@ -60,7 +62,7 @@ static ProcessoPagInfo firstfit(Memoria *mem, int numPaginas) {
 
     // Encontra essa quantidade de páginas livres na memória. (first-fit)
     int contaLivres = 0, primeiraLivre = -1, ocupadas = mem->ocupadas;
-    for(int i = 0; i < 16; ++i) {
+    for(int i = 0; i < NUM_PAGINAS; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -103,7 +105,7 @@ static ProcessoPagInfo nextfit(Memoria *mem, int numPaginas) {
     // verifica se há espaço para alocação da última posição livre até
     // o fim (next fit)
     ocupadas >>= mem->ultimaPos;
-    for(int i = mem->ultimaPos; i < 16; ++i) {
+    for(int i = mem->ultimaPos; i < NUM_PAGINAS; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -138,7 +140,7 @@ static ProcessoPagInfo nextfit(Memoria *mem, int numPaginas) {
 
     // se não há espaço e não houve ocorrencia de 1s significa que o espaço restante
     // é vazio e não é suficiente
-    if(primeiro1 > 0) primeiro1 = 16;
+    if(primeiro1 > 0) primeiro1 = NUM_PAGINAS;
 
     contaLivres = 0;
     primeiraLivre = -1;
@@ -181,7 +183,7 @@ static ProcessoPagInfo bestfit(Memoria *mem, int numPaginas) {
     int melhorLugar = -1, melhorEspaco = 17;
     int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
 
-    for(int i = 0; i < 16; ++i) {
+    for(int i = 0; i < NUM_PAGINAS; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -209,7 +211,7 @@ static ProcessoPagInfo bestfit(Memoria *mem, int numPaginas) {
     }
 
     // não existe espaço maior que 16
-    if(melhorEspaco <= 16) {
+    if(melhorEspaco <= NUM_PAGINAS) {
         // Foi encontrada uma sequência de páginas livres adequada!
         // Começa a partir da posição melhorLugar. Essas páginas serão
         // marcadas como ocupadas
@@ -231,7 +233,7 @@ static ProcessoPagInfo worstfit(Memoria *mem, int numPaginas) {
     int piorLugar = -1, piorEspaco = numPaginas - 1;
     int contaLivres = 0, ocupadas = mem->ocupadas, lugarAtual=-1;
 
-    for(int i = 0; i < 16; ++i) {
+    for(int i = 0; i < NUM_PAGINAS; ++i) {
         // Percorre o bitmap bit a bit, armazenando o valor de cada um em
         // paginaOcupada. Bit ligado => página correspondente não está livre
 
@@ -314,49 +316,51 @@ void memoriaCopia(Memoria *mem, ProcessoPagInfo *dst, ProcessoPagInfo src) {
             src.numPaginas * TAMANHO_PAG);
 }
 
+static void imprimePagina(int pg, const Memoria *mem) {
+    const int linhas = 8;
+    int32_t *pag = (int32_t *) &mem->conteudo[pg * TAMANHO_PAG];
+    int varPorLinha = TAMANHO_PAG / (4 * linhas);
+    for(int i = 0; i < linhas; ++i) {
+        printf("%4d", pag[i * linhas]);
+        for(int j = 1; j < varPorLinha; ++j)
+            printf(" %4d ", pag[i * linhas + j]);
+        printf("\n");
+    }
+}
 
-void imprimeMemoria(const Memoria *mem){
+static void imprimeBitMap(bitmap_t bitmap){
+    int i, r;
+    for(i = NUM_PAGINAS; i >= 0; i--) {
+        // Executa a operação shift right até a última posição da direita
+        // para cada bit.
+        r = bitmap >> i;
+        if(r & 1) printf("1");
+        else printf("0");
+    }
+    printf("\n");
+}
+
+void memoriaImprime(const Memoria *mem){
     printf("\tBitmap da memória:\n");
     imprimeBitMap(mem->ocupadas);
 
     printf("\tInformações de pagina dos processos\n");
-    for(int i = 0; i<NUM_PAGINAS; i++) {
+    for(int i = 0; i < NUM_PAGINAS; i++) {
         int pgInicial = mem->dono[i]->paginaInicial;
         int numPg = mem->dono[i]->numPaginas;
 
         printf("Pagina inicial: %d\nNumero de paginas: %d\n",
-        pgInicial, numPg);
+                pgInicial, numPg);
 
-        if(mem->dono[i]->noDisco){
-           printf("Em disco\n");
-        }else{
+        if(mem->dono[i]->noDisco) {
+            printf("Em disco\n");
+        } else {
             printf("Em memória\n");
-            for(int j = pgInicial; j<(pgInicial+numPg); j++){
+            for(int j = pgInicial; j < pgInicial + numPg; j++){
                 printf("Pagina %d\n", i);
                 imprimePagina(i, mem);
             }
         }
 
     }
-}
-
-void imprimePagina(int pg, const Memoria *mem){
-    for(int i = 8*pg; i< (8*pg+8); i++){
-        printf("%d\n", mem->conteudo[i]);
-    }
-}
-
-void imprimeBitMap(bitmap_t bitmap){
-    int i, r;
-     for(i = 16; i >= 0; i--) {
-    // Executa a operação shift right até a última posição da direita para cada bit.
-    r = bitmap >> i;
-     if(r & 1) {
-        printf("1");
-     } else {
-        printf("0");
-     }
- }
-
- printf("\n");
 }

@@ -50,9 +50,7 @@ void memoriaCopia(Memoria *mem, ProcessoPagInfo *dst, ProcessoPagInfo src);
 // Desaloca uma sequência de páginas da memória (principal ou não)
 void memoriaLibera(Memoria *mem, ProcessoPagInfo pags);
 
-void imprimeMemoria(const Memoria *mem);
+// Imprime informações sobre a memória
+void memoriaImprime(const Memoria *mem);
 
-void imprimePagina(int pg, const Memoria *mem);
-
-void imprimeBitMap(bitmap_t bitmap);
 #endif // MEMORIA_H

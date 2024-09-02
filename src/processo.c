@@ -49,10 +49,12 @@ void processoImprime(const Processo *proc, const Memoria *mem) {
             break;
     }
 
-    printf("REGISTRADORES:\n-----------------\n");
-    for(int r = 0; r < proc->codigo.numRegs; ++r)
-        printf("r%d: %d\n", r, reg[r]);
-    printf("-----------------\n");
+    if(reg != NULL) {
+        printf("REGISTRADORES:\n-----------------\n");
+        for(int r = 0; r < proc->codigo.numRegs; ++r)
+            printf("r%d: %d\n", r, reg[r]);
+        printf("-----------------\n");
+    }
 
     printf("INSTRUÇÕES:\n-----------------\n");
     programaImprime(&proc->codigo, proc->pc);

@@ -63,7 +63,7 @@ int computadorExecuta(Computador *sis) {
 
 void computadorImprime(const Computador* sis) {
     printf("\n\tIMPRIMINDO DADOS DA MEMÓRIA\n");
-    imprimeMemoria(&sis->mem);
+    memoriaImprime(&sis->mem);
     printf("\n\tIMPRIMINDO DADOS DA(S) CPU(S):\n");
     for(int i = 0; i < sis->numCPUs; ++i) {
         if(sis->cpus[i].pidProcessoAtual < 0) continue;
